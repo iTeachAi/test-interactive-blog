@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Hoop City Lessons{% endblock %}</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #141619;
+      --surface: #202328;
+      --text: #f8f6f1;
+      --muted: #bac0c9;
+      --accent: #ff9d57;
+      --border: #3c4149;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      background: var(--background);
+      color: var(--text);
+      font: 1rem/1.6 system-ui, sans-serif;
+    }
+
+    a { color: var(--accent); text-underline-offset: .2em; }
+    a:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    h1, h2, h3, p { margin: 0; }
+
+    .container { width: min(100% - 2rem, 70rem); margin-inline: auto; }
+
+    .masthead {
+      border-top: .35rem solid var(--accent);
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero { padding-block: clamp(2.5rem, 8vw, 6rem); }
+
+    h1 {
+      max-width: 12ch;
+      font-size: clamp(2.8rem, 8vw, 6rem);
+      line-height: .98;
+      letter-spacing: -.065em;
+    }
+
+    .hero p { margin-top: 1rem; color: var(--muted); }
+
+    .section-nav {
+      display: flex;
+      flex-wrap: wrap;
+      gap: .75rem 1.5rem;
+      padding-block: 1rem;
+    }
+
+    main { padding-block: 2rem 4rem; }
+    section + section { margin-top: 3rem; }
+    h2 { margin-bottom: 1rem; font-size: clamp(1.5rem, 4vw, 2rem); }
+
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
+      gap: 1rem;
+    }
+
+    article, .empty {
+      overflow: hidden;
+      border: 1px solid var(--border);
+      border-radius: .75rem;
+      background: var(--surface);
+    }
+
+    article, section { overflow-wrap: anywhere; }
+    article img { display: block; width: 100%; aspect-ratio: 16 / 9; object-fit: cover; }
+    .card-body, .empty { padding: 1.25rem; }
+    .card-body p { margin-top: .5rem; }
+    .meta, .empty { color: var(--muted); }
+    .meta { font-size: .875rem; }
+    .post { max-width: 46rem; }
+    .post h1 { max-width: none; margin-block: .75rem; font-size: clamp(2rem, 6vw, 4rem); }
+    .post-body { margin-top: 1.5rem; white-space: pre-wrap; overflow-wrap: anywhere; }
+  </style>
+  {% block head %}{% endblock %}
+</head>
+<body>
+  {% block content %}{% endblock %}
+</body>
+</html>

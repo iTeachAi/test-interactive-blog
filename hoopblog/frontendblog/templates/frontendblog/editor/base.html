@@ -1,0 +1,62 @@
+{% extends "frontendblog/base.html" %}
+
+{% block head %}
+  <style>
+    .editor-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; }
+    .editor h1 { max-width: none; font-size: clamp(2.25rem, 6vw, 4rem); }
+    .editor-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
+    .editor-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; }
+    .button {
+      display: inline-block;
+      padding: .55rem .9rem;
+      border: 1px solid var(--accent);
+      border-radius: .5rem;
+      background: var(--accent);
+      color: var(--background);
+      font: inherit;
+      font-weight: 700;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .editor :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
+    .button:disabled { background: var(--surface); border-color: var(--border); color: var(--muted); cursor: default; }
+    .delete-link { color: #ffb3ac; }
+    .delete-button { background: #ffb3ac; border-color: #ffb3ac; }
+    .editor-list { list-style: none; margin: 0; padding: 0; }
+    .editor-list li { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .75rem 1.5rem; padding: 1rem; overflow-wrap: anywhere; }
+    .editor-list li + li { border-top: 1px solid var(--border); }
+    .editor-list, .editor-form { border: 1px solid var(--border); border-radius: .75rem; background: var(--surface); }
+    .editor-form { max-width: 48rem; padding: clamp(1rem, 4vw, 2rem); }
+    .editor-form > div + div { margin-top: 1rem; }
+    .editor-form label { display: block; margin-bottom: .3rem; font-weight: 650; }
+    .editor-form input, .editor-form textarea {
+      width: 100%;
+      padding: .65rem;
+      border: 1px solid var(--border);
+      border-radius: .4rem;
+      background: var(--background);
+      color: var(--text);
+      font: inherit;
+    }
+    .editor-form textarea { resize: vertical; }
+    .editor-form textarea[name="summary"] { height: 6rem; }
+    .editor-form .helptext { color: var(--muted); font-size: .875rem; }
+    .errorlist { color: #ffb3ac; }
+    .editor-notice { margin-bottom: 1rem; color: var(--text); }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <header class="masthead">
+    <nav class="container editor-header" aria-label="Post management">
+      <a href="{% url 'home' %}">Hoop City Lessons</a>
+      <a href="{% url 'blog-editor' %}">Manage posts</a>
+    </nav>
+  </header>
+  <main class="container editor">
+    {% for message in messages %}
+      <p class="editor-notice" role="status">{{ message }}</p>
+    {% endfor %}
+    {% block editor_content %}{% endblock %}
+  </main>
+{% endblock %}

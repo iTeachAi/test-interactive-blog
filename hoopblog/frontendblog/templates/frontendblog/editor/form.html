@@ -1,0 +1,17 @@
+{% extends "frontendblog/editor/base.html" %}
+
+{% block title %}{% if object %}Edit post{% else %}New post{% endif %} | Hoop City Lessons{% endblock %}
+
+{% block editor_content %}
+  <div class="editor-heading">
+    <h1>{% if object %}Edit post{% else %}New post{% endif %}</h1>
+  </div>
+  <form class="editor-form" method="post"{% if form.is_multipart %} enctype="multipart/form-data"{% endif %}>
+    {% csrf_token %}
+    {{ form.as_div }}
+    <div class="editor-actions">
+      <button class="button" type="submit">{% if object %}Save changes{% else %}Send to webhook{% endif %}</button>
+      <a href="{% url 'blog-editor' %}">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "frontendblog/base.html" %}
+
+{% block title %}{{ post.title }} | Hoop City Lessons{% endblock %}
+
+{% block head %}
+  <style>
+    .lesson-intro { margin-block: 1.5rem; font-size: 1.2rem; }
+    .lesson-objective, .lesson-takeaway {
+      margin-block: 1.5rem;
+      padding: 1rem 1.25rem;
+      border-left: .25rem solid var(--accent);
+      background: var(--surface);
+    }
+    .lesson-section { margin-block: 2rem; }
+    .lesson-section p + p { margin-top: 1rem; }
+    .lesson-visual { margin: 1.5rem 0; }
+    .lesson-visual img { display: block; width: 100%; height: auto; border-radius: .5rem; }
+    .lesson-visual figcaption { margin-top: .5rem; color: var(--muted); }
+  </style>
+{% endblock %}
+
+{% block content %}
+  <main class="container post">
+    <a href="{% url 'home' %}">All posts</a>
+    <h1>{{ post.title }}</h1>
+    <p class="meta">
+      {{ post.category }} · <time datetime="{{ post.date|date:'Y-m-d' }}">{{ post.date|date:'M j, Y' }}</time>
+      {% if post.author %} · {{ post.author }}{% endif %}
+      {% if post.status != 'published' %} · {{ post.get_status_display }} preview{% endif %}
+    </p>
+    {% if post.image_url %}
+      <figure class="lesson-visual">
+        <img src="{{ post.image_url }}" alt="{{ post.image_alt }}">
+      </figure>
+    {% endif %}
+    {% if lesson_article %}
+      {% if post.summary %}<p class="lesson-intro">{{ post.summary }}</p>{% endif %}
+      {% for visual in cover_visuals %}
+        {% include "frontendblog/lesson_visual.html" with visual=visual only %}
+      {% endfor %}
+      {% if lesson_article.opening %}<p>{{ lesson_article.opening }}</p>{% endif %}
+      {% if learning_objective %}
+        <aside class="lesson-objective">
+          <strong>Learning objective</strong>
+          <p>{{ learning_objective }}</p>
+        </aside>
+      {% endif %}
+      {% for section in lesson_sections %}
+        <section class="lesson-section" aria-labelledby="lesson-section-{{ forloop.counter }}">
+          <h2 id="lesson-section-{{ forloop.counter }}">{{ section.heading }}</h2>
+          {% for paragraph in section.paragraphs %}<p>{{ paragraph }}</p>{% endfor %}
+          {% for visual in section.visuals %}
+            {% include "frontendblog/lesson_visual.html" with visual=visual only %}
+          {% endfor %}
+        </section>
+      {% endfor %}
+      {% if lesson_article.closing_takeaway or lesson_article.reader_action %}
+        <aside class="lesson-takeaway">
+          {% if lesson_article.closing_takeaway %}
+            <h2>Takeaway</h2>
+            <p>{{ lesson_article.closing_takeaway }}</p>
+          {% endif %}
+          {% if lesson_article.reader_action %}
+            <p><strong>Try it</strong> {{ lesson_article.reader_action }}</p>
+          {% endif %}
+        </aside>
+      {% endif %}
+    {% else %}
+      <div class="post-body">{{ post.body }}</div>
+    {% endif %}
+  </main>
+{% endblock %}

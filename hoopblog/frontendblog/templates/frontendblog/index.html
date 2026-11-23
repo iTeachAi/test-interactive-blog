@@ -1,0 +1,71 @@
+{% extends "frontendblog/base.html" %}
+
+{% block content %}
+  <header class="masthead">
+    <div class="container hero">
+      {% if user.is_active and user.is_staff %}
+        {% if perms.backend.add_blogpost or perms.backend.change_blogpost or perms.backend.delete_blogpost %}
+          <nav aria-label="Administration"><a href="{% url 'blog-editor' %}">Manage posts</a></nav>
+        {% endif %}
+      {% endif %}
+      <h1>Hoop City Lessons</h1>
+      <p>Explore basketball lessons and articles by topic.</p>
+    </div>
+  </header>
+
+  {% if sections %}
+    <nav class="container section-nav" aria-label="Content sections">
+      {% for section in sections %}
+        <a href="#section-{{ forloop.counter }}">{{ section.title }}</a>
+      {% endfor %}
+    </nav>
+  {% endif %}
+
+  <main class="container">
+    {% comment %}
+      The view can pass sections with title and entries. Each entry has a
+      title and optional summary, url, image_url, image_alt, date, and author.
+      Supply date as a date or datetime.
+    {% endcomment %}
+    {% for section in sections %}
+      <section id="section-{{ forloop.counter }}" aria-labelledby="heading-{{ forloop.counter }}">
+        <h2 id="heading-{{ forloop.counter }}">{{ section.title }}</h2>
+        {% if section.entries %}
+          <div class="cards">
+            {% for entry in section.entries %}
+              <article>
+                {% if entry.image_url %}
+                  <img src="{{ entry.image_url }}" alt="{{ entry.image_alt|default:'' }}" loading="lazy">
+                {% endif %}
+                <div class="card-body">
+                  <h3>
+                    {% if entry.url %}
+                      <a href="{{ entry.url }}">{{ entry.title }}</a>
+                    {% else %}
+                      {{ entry.title }}
+                    {% endif %}
+                  </h3>
+                  {% if entry.date or entry.author %}
+                    <p class="meta">
+                      {% if entry.date %}<time datetime="{{ entry.date|date:'Y-m-d' }}">{{ entry.date|date:'M j, Y' }}</time>{% endif %}
+                      {% if entry.date and entry.author %} · {% endif %}
+                      {% if entry.author %}{{ entry.author }}{% endif %}
+                    </p>
+                  {% endif %}
+                  {% if entry.summary %}<p>{{ entry.summary }}</p>{% endif %}
+                </div>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="empty">There are no entries in this section yet.</p>
+        {% endif %}
+      </section>
+    {% empty %}
+      <section aria-labelledby="latest-heading">
+        <h2 id="latest-heading">Latest posts</h2>
+        <p class="empty">There are no posts to display yet.</p>
+      </section>
+    {% endfor %}
+  </main>
+{% endblock %}

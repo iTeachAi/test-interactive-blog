@@ -1,0 +1,17 @@
+{% extends "frontendblog/editor/base.html" %}
+
+{% block title %}Delete post | Hoop City Lessons{% endblock %}
+
+{% block editor_content %}
+  <div class="editor-heading">
+    <h1>Delete post?</h1>
+  </div>
+  <form class="editor-form" method="post">
+    {% csrf_token %}
+    <div><p>“{{ object.title }}” will be permanently deleted from the blog.</p></div>
+    <div class="editor-actions">
+      <a href="{% url 'blog-editor' %}">Cancel</a>
+      <button class="button delete-button" type="submit">Delete post</button>
+    </div>
+  </form>
+{% endblock %}

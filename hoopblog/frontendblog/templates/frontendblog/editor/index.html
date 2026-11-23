@@ -1,0 +1,51 @@
+{% extends "frontendblog/editor/base.html" %}
+
+{% block title %}Manage posts | Hoop City Lessons{% endblock %}
+
+{% block editor_content %}
+  <div class="editor-heading">
+    <h1>Manage posts</h1>
+    {% if perms.backend.add_blogpost %}
+      <a class="button" href="{% url 'blog-create' %}">New post</a>
+    {% endif %}
+  </div>
+
+  {% if posts %}
+    <ul class="editor-list">
+      {% for post in posts %}
+        <li>
+          <div>
+            <h2 style="font-size: 1.125rem; margin: 0;">{{ post.title }}</h2>
+            <p class="meta">{{ post.category }} · {{ post.date|date:"M j, Y" }} · {{ post.get_status_display }}</p>
+          </div>
+          <div class="editor-actions">
+            <a href="{{ post.get_absolute_url }}" aria-label="View {{ post.title }}">{% if post.status == 'published' %}View{% else %}Preview{% endif %}</a>
+            {% if perms.backend.change_blogpost %}
+              <a href="{% url 'blog-update' post.pk %}" aria-label="Edit {{ post.title }}">Edit</a>
+              {% if not post.image_url %}
+                {% if post.status == 'approved' %}
+                  <form method="post" action="{% url 'blog-generate-image' post.pk %}">
+                    {% csrf_token %}
+                    <button class="button" type="submit" aria-label="Generate image for {{ post.title }}">Generate image</button>
+                  </form>
+                {% else %}
+                  <div>
+                    <button class="button" type="button" disabled>Generate image</button>
+                    <p class="meta">Set Status to Approved under Edit to enable.</p>
+                  </div>
+                {% endif %}
+              {% else %}
+                <span class="meta">Cover image added</span>
+              {% endif %}
+            {% endif %}
+            {% if perms.backend.delete_blogpost %}
+              <a class="delete-link" href="{% url 'blog-delete' post.pk %}" aria-label="Delete {{ post.title }}">Delete</a>
+            {% endif %}
+          </div>
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">There are no blog posts yet.</p>
+  {% endif %}
+{% endblock %}
