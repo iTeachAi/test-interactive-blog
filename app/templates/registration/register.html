@@ -1,0 +1,665 @@
+{% extends "app/base.html" %}
+
+{% block title %}Create Account | Courtside{% endblock %}
+
+{% block content %}
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+
+    .registration-page {
+        --court-black: #0b0d10;
+        --charcoal-panel: #15181d;
+        --glass-white: rgba(255, 255, 255, 0.06);
+        --glass-hover: rgba(255, 255, 255, 0.09);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --net-orange: #d9622b;
+        --hardwood-amber: #e8a33d;
+        --chalk-white: #f4f2ec;
+        --smoke-grey: #92979e;
+        --error-red: #ff786f;
+
+        position: relative;
+        display: grid;
+        min-height: 100vh;
+        margin-inline: calc(50% - 50vw);
+        padding: clamp(2rem, 6vw, 5rem) 1rem;
+        place-items: center;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "Inter", sans-serif;
+        background:
+            radial-gradient(
+                circle at 86% 12%,
+                rgba(217, 98, 43, 0.2),
+                transparent 27%
+            ),
+            radial-gradient(
+                circle at 10% 86%,
+                rgba(232, 163, 61, 0.09),
+                transparent 30%
+            ),
+            repeating-linear-gradient(
+                90deg,
+                transparent 0,
+                transparent 9.95%,
+                rgba(255, 255, 255, 0.022) 10%
+            ),
+            var(--court-black);
+    }
+
+    .registration-page *,
+    .registration-page *::before,
+    .registration-page *::after {
+        box-sizing: border-box;
+    }
+
+    .registration-page::before {
+        position: absolute;
+        top: -14rem;
+        right: -11rem;
+        width: 38rem;
+        height: 38rem;
+        content: "";
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 4rem rgba(255, 255, 255, 0.014),
+            0 0 0 9rem rgba(255, 255, 255, 0.009);
+        pointer-events: none;
+    }
+
+    .registration-shell {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        width: min(100%, 1040px);
+        grid-template-columns: minmax(0, 0.92fr) minmax(420px, 1.08fr);
+        overflow: hidden;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+        animation: registrationFadeUp 550ms ease-out both;
+    }
+
+    /* Brand panel */
+
+    .registration-intro {
+        position: relative;
+        display: flex;
+        min-height: 100%;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: clamp(2rem, 5vw, 4rem);
+        overflow: hidden;
+        background:
+            linear-gradient(
+                145deg,
+                rgba(217, 98, 43, 0.18),
+                rgba(255, 255, 255, 0.025) 55%
+            ),
+            var(--charcoal-panel);
+        border-right: 1px solid var(--glass-border);
+    }
+
+    .registration-intro::before {
+        position: absolute;
+        right: -9rem;
+        bottom: -9rem;
+        width: 24rem;
+        height: 24rem;
+        content: "";
+        border: 1px solid rgba(232, 163, 61, 0.18);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 2.5rem rgba(217, 98, 43, 0.035),
+            0 0 0 5.5rem rgba(255, 255, 255, 0.018);
+    }
+
+    .registration-brand {
+        position: relative;
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        gap: 0.7rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+    }
+
+    .registration-brand__icon {
+        display: grid;
+        width: 2.6rem;
+        height: 2.6rem;
+        place-items: center;
+        color: var(--chalk-white);
+        font-size: 1rem;
+        background: var(--net-orange);
+        border: 1px solid rgba(255, 255, 255, 0.16);
+        border-radius: 10px;
+        box-shadow: 0 8px 22px rgba(0, 0, 0, 0.32);
+    }
+
+    .registration-intro__content {
+        position: relative;
+        margin: clamp(4rem, 10vw, 8rem) 0;
+    }
+
+    .registration-intro__label {
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        margin: 0 0 1rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+    }
+
+    .registration-intro__label::before {
+        width: 2.3rem;
+        height: 2px;
+        content: "";
+        background: var(--net-orange);
+    }
+
+    .registration-intro__title {
+        max-width: 430px;
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(3rem, 6vw, 5.2rem);
+        font-weight: 400;
+        line-height: 0.95;
+        letter-spacing: -0.035em;
+        text-transform: uppercase;
+    }
+
+    .registration-intro__title span {
+        display: block;
+        color: var(--net-orange);
+    }
+
+    .registration-intro__text {
+        max-width: 440px;
+        margin: 1.5rem 0 0;
+        color: var(--smoke-grey);
+        font-size: 0.92rem;
+        line-height: 1.75;
+    }
+
+    .registration-intro__footer {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        color: var(--smoke-grey);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.63rem;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+    }
+
+    .registration-intro__status {
+        width: 0.5rem;
+        height: 0.5rem;
+        background: var(--hardwood-amber);
+        border-radius: 50%;
+        box-shadow: 0 0 0 5px rgba(232, 163, 61, 0.1);
+    }
+
+    /* Form panel */
+
+    .registration-card {
+        position: relative;
+        padding: clamp(2rem, 5vw, 4rem);
+        background:
+            linear-gradient(
+                145deg,
+                rgba(255, 255, 255, 0.055),
+                transparent 48%
+            ),
+            rgba(11, 13, 16, 0.84);
+    }
+
+    .registration-card::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: linear-gradient(
+            90deg,
+            var(--net-orange),
+            var(--hardwood-amber),
+            transparent 85%
+        );
+    }
+
+    .registration-card__eyebrow {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 0 0 0.8rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.66rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+    }
+
+    .registration-card__title {
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(2.3rem, 5vw, 3.7rem);
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.025em;
+        text-transform: uppercase;
+    }
+
+    .registration-card__description {
+        max-width: 540px;
+        margin: 1rem 0 2rem;
+        color: var(--smoke-grey);
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+
+    .registration-form {
+        display: grid;
+        gap: 1.15rem;
+    }
+
+    .form-field {
+        display: grid;
+        gap: 0.55rem;
+    }
+
+    .form-field label {
+        color: var(--chalk-white);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.66rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    .form-field input,
+    .form-field select,
+    .form-field textarea {
+        width: 100%;
+        min-height: 3.25rem;
+        padding: 0.85rem 1rem;
+        color: var(--chalk-white);
+        font: inherit;
+        font-size: 0.92rem;
+        background: rgba(255, 255, 255, 0.055);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+        box-shadow: none;
+        outline: none;
+        transition:
+            background 200ms ease,
+            border-color 200ms ease,
+            box-shadow 200ms ease,
+            transform 200ms ease;
+    }
+
+    .form-field textarea {
+        min-height: 7rem;
+        resize: vertical;
+    }
+
+    .form-field input::placeholder,
+    .form-field textarea::placeholder {
+        color: #737980;
+    }
+
+    .form-field input:hover,
+    .form-field select:hover,
+    .form-field textarea:hover {
+        background: rgba(255, 255, 255, 0.075);
+        border-color: rgba(232, 163, 61, 0.25);
+    }
+
+    .form-field input:focus,
+    .form-field select:focus,
+    .form-field textarea:focus {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: var(--hardwood-amber);
+        box-shadow:
+            0 0 0 3px rgba(232, 163, 61, 0.11),
+            0 10px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    .form-field select option {
+        color: var(--chalk-white);
+        background: var(--charcoal-panel);
+    }
+
+    .help-text {
+        color: var(--smoke-grey);
+        font-size: 0.72rem;
+        line-height: 1.55;
+    }
+
+    .help-text ul {
+        margin: 0.3rem 0 0;
+        padding-left: 1.15rem;
+    }
+
+    .help-text li {
+        margin-bottom: 0.25rem;
+    }
+
+    .errorlist {
+        margin: 0;
+        padding: 0.85rem 1rem;
+        color: var(--error-red);
+        font-size: 0.78rem;
+        line-height: 1.55;
+        list-style: none;
+        background: rgba(255, 120, 111, 0.08);
+        border: 1px solid rgba(255, 120, 111, 0.2);
+        border-left: 3px solid var(--error-red);
+        border-radius: 10px;
+    }
+
+    .field-error {
+        margin: 0;
+        color: var(--error-red);
+        font-size: 0.75rem;
+        line-height: 1.5;
+    }
+
+    .registration-submit {
+        position: relative;
+        display: inline-flex;
+        width: 100%;
+        min-height: 3.3rem;
+        align-items: center;
+        justify-content: center;
+        gap: 0.7rem;
+        margin-top: 0.45rem;
+        padding: 0.9rem 1.25rem;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        background: var(--net-orange);
+        border: 1px solid var(--net-orange);
+        border-radius: 10px;
+        box-shadow: 0 10px 26px rgba(0, 0, 0, 0.34);
+        cursor: pointer;
+        transition:
+            color 250ms ease,
+            background 250ms ease,
+            border-color 250ms ease,
+            box-shadow 250ms ease,
+            transform 250ms ease;
+    }
+
+    .registration-submit::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: var(--hardwood-amber);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 300ms ease;
+    }
+
+    .registration-submit:hover {
+        color: var(--court-black);
+        background: var(--hardwood-amber);
+        border-color: var(--hardwood-amber);
+        box-shadow: 0 15px 34px rgba(0, 0, 0, 0.42);
+        transform: translateY(-3px);
+    }
+
+    .registration-submit:hover::after,
+    .registration-submit:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    .registration-submit:focus-visible {
+        outline: 2px solid var(--hardwood-amber);
+        outline-offset: 4px;
+    }
+
+    .registration-login {
+        margin: 1.75rem 0 0;
+        padding-top: 1.5rem;
+        color: var(--smoke-grey);
+        font-size: 0.82rem;
+        text-align: center;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .registration-login a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.35rem;
+        color: var(--hardwood-amber);
+        font-weight: 600;
+        text-decoration: none;
+        transition:
+            color 200ms ease,
+            transform 200ms ease;
+    }
+
+    .registration-login a:hover {
+        color: var(--chalk-white);
+        transform: translateX(3px);
+    }
+
+    .registration-login a:focus-visible {
+        outline: 2px solid var(--hardwood-amber);
+        outline-offset: 4px;
+    }
+
+    @keyframes registrationFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(14px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .registration-shell {
+            width: min(100%, 680px);
+            grid-template-columns: 1fr;
+        }
+
+        .registration-intro {
+            min-height: auto;
+            border-right: 0;
+            border-bottom: 1px solid var(--glass-border);
+        }
+
+        .registration-intro__content {
+            margin: 3.5rem 0 2rem;
+        }
+
+        .registration-intro__title {
+            max-width: 560px;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .registration-page {
+            padding: 1rem;
+            place-items: start center;
+        }
+
+        .registration-intro,
+        .registration-card {
+            padding: 1.5rem;
+        }
+
+        .registration-intro__content {
+            margin: 2.5rem 0 1.5rem;
+        }
+
+        .registration-intro__title {
+            font-size: clamp(2.65rem, 14vw, 4rem);
+        }
+
+        .registration-card__title {
+            font-size: 2.35rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .registration-page *,
+        .registration-page *::before,
+        .registration-page *::after {
+            animation-duration: 1ms !important;
+            animation-delay: 0ms !important;
+            transition-duration: 1ms !important;
+        }
+
+        .registration-submit:hover,
+        .registration-login a:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<main class="registration-page">
+    <div class="registration-shell">
+        <section
+            class="registration-intro"
+            aria-labelledby="registration-intro-title"
+        >
+            <div class="registration-brand">
+                <span class="registration-brand__icon" aria-hidden="true">
+                    <i class="bi bi-dribbble"></i>
+                </span>
+
+                Courtside
+            </div>
+
+            <div class="registration-intro__content">
+                <p class="registration-intro__label">
+                    Basketball Intelligence Lab
+                </p>
+
+                <h2
+                    id="registration-intro-title"
+                    class="registration-intro__title"
+                >
+                    Your perspective.
+                    <span>Your lesson.</span>
+                </h2>
+
+                <p class="registration-intro__text">
+                    Choose a basketball investigation, share how you understand
+                    the game, and receive a personalized breakdown built around
+                    your current perspective.
+                </p>
+            </div>
+
+            <div class="registration-intro__footer">
+                <span
+                    class="registration-intro__status"
+                    aria-hidden="true"
+                ></span>
+
+                Registration is open
+            </div>
+        </section>
+
+        <section
+            class="registration-card"
+            aria-labelledby="registration-title"
+        >
+            <p class="registration-card__eyebrow">
+                <i class="bi bi-person-plus" aria-hidden="true"></i>
+                Enter the film room
+            </p>
+
+            <h1
+                id="registration-title"
+                class="registration-card__title"
+            >
+                Create your account
+            </h1>
+
+            <p class="registration-card__description">
+                Register to choose an investigation and create personalized
+                basketball content from your answers.
+            </p>
+
+            <form method="post" class="registration-form">
+                {% csrf_token %}
+
+                {% if next %}
+                    <input type="hidden" name="next" value="{{ next }}">
+                {% endif %}
+
+                {{ form.non_field_errors }}
+
+                {% for field in form %}
+                    <div class="form-field">
+                        {{ field.label_tag }}
+                        {{ field }}
+
+                        {% if field.help_text %}
+                            <div class="help-text">
+                                {{ field.help_text|safe }}
+                            </div>
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <p class="field-error" role="alert">
+                                <i
+                                    class="bi bi-exclamation-circle"
+                                    aria-hidden="true"
+                                ></i>
+                                {{ error }}
+                            </p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+
+                <button type="submit" class="registration-submit">
+                    Create Account
+                    <i class="bi bi-arrow-right" aria-hidden="true"></i>
+                </button>
+            </form>
+
+            <p class="registration-login">
+                Already have an account?
+                <a href="{% url 'login' %}">
+                    Log in
+                    <i class="bi bi-arrow-right-short" aria-hidden="true"></i>
+                </a>
+            </p>
+        </section>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,714 @@
+{% extends "adminblog/base.html" %}
+
+{% block title %}Select a Topic | Courtside{% endblock %}
+
+{% block content %}
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+
+    .select-topic-page {
+        --court-black: #0b0d10;
+        --charcoal-panel: #15181d;
+        --glass-white: rgba(255, 255, 255, 0.06);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --net-orange: #d9622b;
+        --hardwood-amber: #e8a33d;
+        --chalk-white: #f4f2ec;
+        --smoke-grey: #8b9096;
+
+        min-height: 100vh;
+        margin-inline: calc(50% - 50vw);
+        padding: 4rem 1rem 6rem;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "Inter", sans-serif;
+        background:
+            radial-gradient(
+                circle at 88% 10%,
+                rgba(217, 98, 43, 0.18),
+                transparent 26%
+            ),
+            radial-gradient(
+                circle at 8% 82%,
+                rgba(232, 163, 61, 0.08),
+                transparent 28%
+            ),
+            repeating-linear-gradient(
+                90deg,
+                transparent 0,
+                transparent 9.95%,
+                rgba(255, 255, 255, 0.022) 10%
+            ),
+            var(--court-black);
+    }
+
+    .select-topic-page *,
+    .select-topic-page *::before,
+    .select-topic-page *::after {
+        box-sizing: border-box;
+    }
+
+    .select-topic-shell {
+        width: min(100%, 1180px);
+        margin: 0 auto;
+    }
+
+    .gloss-panel {
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .page-header {
+        position: relative;
+        padding: clamp(2rem, 5vw, 4.5rem);
+        overflow: hidden;
+        animation: topicFadeUp 550ms ease-out both;
+    }
+
+    .page-header::before {
+        position: absolute;
+        top: -11rem;
+        right: -9rem;
+        width: 29rem;
+        height: 29rem;
+        content: "";
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 3rem rgba(255, 255, 255, 0.018),
+            0 0 0 7rem rgba(255, 255, 255, 0.012);
+        pointer-events: none;
+    }
+
+    .page-header::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: linear-gradient(
+            90deg,
+            var(--net-orange),
+            var(--hardwood-amber),
+            transparent 80%
+        );
+    }
+
+    .page-kicker,
+    .section-kicker,
+    .topic-label {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .page-kicker {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0 0 1rem;
+        color: var(--hardwood-amber);
+    }
+
+    .page-kicker::before {
+        width: 2.5rem;
+        height: 2px;
+        content: "";
+        background: var(--net-orange);
+    }
+
+    .page-title {
+        position: relative;
+        max-width: 780px;
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(3rem, 7vw, 6.25rem);
+        font-weight: 400;
+        line-height: 0.95;
+        letter-spacing: -0.035em;
+        text-transform: uppercase;
+    }
+
+    .page-description {
+        position: relative;
+        max-width: 720px;
+        margin: 1.5rem 0 0;
+        color: var(--smoke-grey);
+        font-size: 1rem;
+        line-height: 1.75;
+    }
+
+    .step-indicator {
+        position: relative;
+        display: grid;
+        min-width: 170px;
+        gap: 0.3rem;
+        padding: 1rem;
+        color: var(--smoke-grey);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+    }
+
+    .step-indicator span {
+        color: var(--net-orange);
+        font-family: "Anton", sans-serif;
+        font-size: 2rem;
+        font-weight: 400;
+        line-height: 1;
+    }
+
+    .lesson-panel,
+    .topics-panel {
+        margin-top: 1rem;
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+        animation: topicFadeUp 550ms 80ms ease-out both;
+    }
+
+    .topics-panel {
+        animation-delay: 160ms;
+    }
+
+    .panel-heading {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .section-kicker {
+        margin: 0 0 0.65rem;
+        color: var(--hardwood-amber);
+    }
+
+    .section-title {
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+    }
+
+    .section-copy {
+        max-width: 640px;
+        margin: 0.75rem 0 0;
+        color: var(--smoke-grey);
+        font-size: 0.9rem;
+        line-height: 1.65;
+    }
+
+    .section-icon {
+        display: grid;
+        width: 3rem;
+        height: 3rem;
+        flex: 0 0 3rem;
+        place-items: center;
+        color: var(--hardwood-amber);
+        font-size: 1.2rem;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+    }
+
+    .lesson-content {
+        position: relative;
+        margin: 0;
+        padding: 1.5rem;
+        color: var(--chalk-white);
+        font-size: clamp(1rem, 2vw, 1.08rem);
+        line-height: 1.8;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-left: 2px solid var(--net-orange);
+        border-radius: 14px;
+    }
+
+    .topic-grid {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 1rem;
+    }
+
+    .topic-card {
+        position: relative;
+        display: flex;
+        min-height: 330px;
+        flex-direction: column;
+        padding: clamp(1.4rem, 3vw, 2rem);
+        overflow: hidden;
+        background:
+            linear-gradient(
+                160deg,
+                rgba(255, 255, 255, 0.06),
+                transparent
+            ),
+            var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        animation: topicCardFadeUp 550ms ease-out both;
+        transition:
+            background 250ms ease,
+            border-color 250ms ease,
+            box-shadow 250ms ease,
+            transform 250ms ease;
+    }
+
+    .topic-card:nth-child(2) {
+        animation-delay: 80ms;
+    }
+
+    .topic-card:nth-child(3) {
+        animation-delay: 160ms;
+    }
+
+    .topic-card:nth-child(4) {
+        animation-delay: 240ms;
+    }
+
+    .topic-card:nth-child(5) {
+        animation-delay: 320ms;
+    }
+
+    .topic-card::before {
+        position: absolute;
+        top: -3rem;
+        right: -1rem;
+        content: attr(data-number);
+        color: var(--glass-white);
+        font-family: "Anton", sans-serif;
+        font-size: 12rem;
+        line-height: 1;
+        pointer-events: none;
+    }
+
+    .topic-card::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: var(--net-orange);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 300ms ease;
+    }
+
+    .topic-card:hover,
+    .topic-card:focus-within {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: var(--glass-border);
+        box-shadow: 0 14px 34px rgba(0, 0, 0, 0.35);
+        transform: translateY(-4px);
+    }
+
+    .topic-card:hover::after,
+    .topic-card:focus-within::after {
+        transform: scaleX(1);
+    }
+
+    .topic-card-header {
+        position: relative;
+        display: grid;
+        grid-template-columns: 3.2rem minmax(0, 1fr);
+        gap: 1rem;
+        align-items: start;
+    }
+
+    .topic-number {
+        color: var(--net-orange);
+        font-family: "Anton", sans-serif;
+        font-size: 2.75rem;
+        line-height: 0.9;
+        letter-spacing: -0.03em;
+    }
+
+    .topic-label {
+        display: block;
+        margin-bottom: 0.65rem;
+        color: var(--hardwood-amber);
+    }
+
+    .topic-title {
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(1.65rem, 3vw, 2.4rem);
+        font-weight: 400;
+        line-height: 1.05;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+    }
+
+    .topic-principle {
+        position: relative;
+        margin: 1.5rem 0 2rem;
+        color: var(--smoke-grey);
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+
+    .topic-form {
+        position: relative;
+        margin-top: auto;
+        padding-top: 1.25rem;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .select-button {
+        position: relative;
+        display: inline-flex;
+        width: 100%;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+        padding: 0.9rem 1.2rem;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        background: var(--net-orange);
+        border: 1px solid var(--net-orange);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        transition:
+            color 250ms ease,
+            background 250ms ease,
+            border-color 250ms ease,
+            transform 250ms ease;
+    }
+
+    .select-button::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: var(--hardwood-amber);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 300ms ease;
+    }
+
+    .select-button:hover {
+        color: var(--court-black);
+        background: var(--hardwood-amber);
+        border-color: var(--hardwood-amber);
+        transform: translateY(-4px);
+    }
+
+    .select-button:hover::after,
+    .select-button:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    .select-button:focus-visible {
+        outline: 2px solid var(--hardwood-amber);
+        outline-offset: 4px;
+    }
+
+    .empty-state {
+        grid-column: 1 / -1;
+        padding: clamp(2rem, 6vw, 4rem);
+        text-align: center;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .empty-icon {
+        display: grid;
+        width: 4rem;
+        height: 4rem;
+        margin: 0 auto 1.25rem;
+        place-items: center;
+        color: var(--hardwood-amber);
+        font-size: 1.5rem;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+    }
+
+    .empty-title {
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(1.8rem, 4vw, 2.6rem);
+        font-weight: 400;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+    }
+
+    .empty-copy {
+        max-width: 560px;
+        margin: 0.8rem auto 0;
+        color: var(--smoke-grey);
+        line-height: 1.7;
+    }
+
+    .error-panel {
+        max-width: 680px;
+        margin: 1.5rem auto 0;
+        padding: 1rem;
+        color: var(--smoke-grey);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        line-height: 1.6;
+        text-align: left;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-left: 2px solid var(--net-orange);
+        border-radius: 14px;
+    }
+
+    .error-panel strong {
+        color: var(--hardwood-amber);
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+    }
+
+    @keyframes topicFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @keyframes topicCardFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .step-indicator {
+            width: fit-content;
+        }
+
+        .topic-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .topic-card {
+            min-height: 0;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .select-topic-page {
+            padding-top: 2rem;
+        }
+
+        .page-header,
+        .lesson-panel,
+        .topics-panel {
+            padding: 1.5rem;
+        }
+
+        .panel-heading {
+            align-items: stretch;
+        }
+
+        .section-icon {
+            display: none;
+        }
+
+        .topic-card-header {
+            grid-template-columns: 2.6rem minmax(0, 1fr);
+        }
+
+        .topic-number {
+            font-size: 2.2rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .select-topic-page *,
+        .select-topic-page *::before,
+        .select-topic-page *::after {
+            animation-duration: 1ms !important;
+            animation-delay: 0ms !important;
+            transition-duration: 200ms !important;
+        }
+
+        .topic-card:hover,
+        .topic-card:focus-within,
+        .select-button:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<main class="select-topic-page">
+    <div class="select-topic-shell">
+
+        <header class="gloss-panel page-header">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3">
+                <div>
+                    <p class="page-kicker">
+                        <i class="bi bi-signpost-split" aria-hidden="true"></i>
+                        Topic Selection
+                    </p>
+
+                    <h1 class="page-title">
+                        Select the best blog topic.
+                    </h1>
+
+                    <p class="page-description">
+                        Compare each topic and its central principle, then choose the
+                        direction that should move forward into the question stage.
+                    </p>
+                </div>
+
+                <div class="step-indicator" aria-label="Step 2: Select a topic">
+                    <span>02</span>
+                    Select a topic
+                </div>
+            </div>
+        </header>
+
+        <section class="gloss-panel lesson-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="section-kicker">Original Lesson</p>
+
+                    <h2 class="section-title">Lesson Description</h2>
+
+                    <p class="section-copy">
+                        Use the original lesson as the standard for comparing each topic.
+                    </p>
+                </div>
+
+                <div class="section-icon" aria-hidden="true">
+                    <i class="bi bi-journal-text"></i>
+                </div>
+            </div>
+
+            <p class="lesson-content">
+                {{ topic_request.lesson_description }}
+            </p>
+        </section>
+
+        <section class="gloss-panel topics-panel">
+            <div class="panel-heading">
+                <div>
+                    <p class="section-kicker">Generated Directions</p>
+
+                    <h2 class="section-title">Available Topics</h2>
+
+                    <p class="section-copy">
+                        Review the teaching angle and principle before making your selection.
+                    </p>
+                </div>
+
+                <div class="section-icon" aria-hidden="true">
+                    <i class="bi bi-stars"></i>
+                </div>
+            </div>
+
+            <div class="topic-grid">
+                {% for generated_topic in generated_topics %}
+                    <article class="topic-card">
+                        <div class="topic-card-header">
+                            <span class="topic-number" aria-hidden="true">
+                                {{ forloop.counter|stringformat:"02d" }}
+                            </span>
+
+                            <div>
+                                <span class="topic-label">Topic option</span>
+
+                                <h2 class="topic-title">
+                                    {{ generated_topic.topic }}
+                                </h2>
+                            </div>
+                        </div>
+
+                        <p class="topic-principle">
+                            {{ generated_topic.principle }}
+                        </p>
+
+                        <form method="post" class="topic-form">
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="topic_index"
+                                value="{{ forloop.counter0 }}"
+                            >
+
+                            <button type="submit" class="select-button">
+                                <i class="bi bi-check2-circle" aria-hidden="true"></i>
+                                Select this topic
+                            </button>
+                        </form>
+                    </article>
+                {% empty %}
+                    <div class="empty-state">
+                        <div class="empty-icon" aria-hidden="true">
+                            <i class="bi bi-lightbulb-off"></i>
+                        </div>
+
+                        <h3 class="empty-title">
+                            No generated topics are available.
+                        </h3>
+
+                        <p class="empty-copy">
+                            Add more detail to the lesson and generate the topic options again.
+                        </p>
+
+                        {% if topic_request.generation_error %}
+                            <div class="error-panel" role="alert">
+                                <strong class="d-block mb-1">
+                                    Generation error
+                                </strong>
+
+                                {{ topic_request.generation_error }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            </div>
+        </section>
+
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,688 @@
+{% extends "adminblog/base.html" %}
+
+{% block title %}Start an Investigation | Courtside{% endblock %}
+
+{% block content %}
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+
+    .create-topic-page {
+        --court-black: #0b0d10;
+        --charcoal-panel: #15181d;
+        --glass-white: rgba(255, 255, 255, 0.06);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --net-orange: #d9622b;
+        --hardwood-amber: #e8a33d;
+        --chalk-white: #f4f2ec;
+        --smoke-grey: #8b9096;
+
+        min-height: 100vh;
+        margin-inline: calc(50% - 50vw);
+        padding: 4rem 1rem 6rem;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "Inter", sans-serif;
+        background:
+            radial-gradient(
+                circle at 88% 10%,
+                rgba(217, 98, 43, 0.18),
+                transparent 26%
+            ),
+            radial-gradient(
+                circle at 8% 82%,
+                rgba(232, 163, 61, 0.08),
+                transparent 28%
+            ),
+            repeating-linear-gradient(
+                90deg,
+                transparent 0,
+                transparent 9.95%,
+                rgba(255, 255, 255, 0.022) 10%
+            ),
+            var(--court-black);
+    }
+
+    .create-topic-page *,
+    .create-topic-page *::before,
+    .create-topic-page *::after {
+        box-sizing: border-box;
+    }
+
+    .page-shell {
+        width: min(100%, 1180px);
+        margin: 0 auto;
+    }
+
+    .gloss-panel {
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .page-header {
+        position: relative;
+        padding: clamp(2rem, 5vw, 4.5rem);
+        overflow: hidden;
+    }
+
+    .page-header::before {
+        position: absolute;
+        top: -11rem;
+        right: -9rem;
+        width: 29rem;
+        height: 29rem;
+        content: "";
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 3rem rgba(255, 255, 255, 0.018),
+            0 0 0 7rem rgba(255, 255, 255, 0.012);
+        pointer-events: none;
+    }
+
+    .page-header::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: linear-gradient(
+            90deg,
+            var(--net-orange),
+            var(--hardwood-amber),
+            transparent 80%
+        );
+    }
+
+    .page-kicker,
+    .guidance-kicker {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0 0 1rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .page-kicker::before {
+        width: 2.5rem;
+        height: 2px;
+        content: "";
+        background: var(--net-orange);
+    }
+
+    .page-title {
+        position: relative;
+        max-width: 780px;
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(3rem, 7vw, 6.25rem);
+        font-weight: 400;
+        line-height: 0.95;
+        letter-spacing: -0.035em;
+        text-transform: uppercase;
+    }
+
+    .page-description {
+        position: relative;
+        max-width: 720px;
+        margin: 1.5rem 0 0;
+        color: var(--smoke-grey);
+        font-size: 1rem;
+        line-height: 1.75;
+    }
+
+    .step-indicator {
+        position: relative;
+        display: grid;
+        min-width: 170px;
+        gap: 0.3rem;
+        padding: 1rem;
+        color: var(--smoke-grey);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+    }
+
+    .step-indicator span {
+        color: var(--net-orange);
+        font-family: "Anton", sans-serif;
+        font-size: 2rem;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.02em;
+    }
+
+    .content-shell {
+        margin-top: 1rem;
+    }
+
+    .form-panel,
+    .guidance-panel {
+        height: 100%;
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+    }
+
+    .form-panel {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .form-panel::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: var(--net-orange);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 300ms ease;
+    }
+
+    .form-panel:focus-within::after {
+        transform: scaleX(1);
+    }
+
+    .form-panel-header {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .form-panel-title,
+    .guidance-title {
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+    }
+
+    .form-panel-title {
+        font-size: clamp(2rem, 4vw, 3rem);
+    }
+
+    .form-panel-copy {
+        max-width: 590px;
+        margin: 0.75rem 0 0;
+        color: var(--smoke-grey);
+        font-size: 0.92rem;
+        line-height: 1.7;
+    }
+
+    .form-icon {
+        display: grid;
+        width: 3rem;
+        height: 3rem;
+        flex: 0 0 3rem;
+        place-items: center;
+        color: var(--hardwood-amber);
+        font-size: 1.2rem;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+    }
+
+    .topic-form p {
+        margin: 0 0 1.5rem;
+    }
+
+    .topic-form label {
+        display: block;
+        margin-bottom: 0.65rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+    }
+
+    .topic-form input:not([type="checkbox"]):not([type="radio"]),
+    .topic-form textarea,
+    .topic-form select {
+        display: block;
+        width: 100%;
+        padding: 1rem 1.1rem;
+        color: var(--chalk-white);
+        font: inherit;
+        line-height: 1.65;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        outline: none;
+        transition:
+            border-color 200ms ease,
+            background 200ms ease,
+            box-shadow 200ms ease;
+    }
+
+    .topic-form textarea {
+        min-height: 260px;
+        resize: vertical;
+    }
+
+    .topic-form input::placeholder,
+    .topic-form textarea::placeholder {
+        color: var(--smoke-grey);
+        opacity: 0.75;
+    }
+
+    .topic-form input:focus,
+    .topic-form textarea:focus,
+    .topic-form select:focus {
+        background: rgba(255, 255, 255, 0.09);
+        border-color: var(--hardwood-amber);
+        box-shadow: 0 0 0 4px rgba(232, 163, 61, 0.1);
+    }
+
+    .topic-form .helptext {
+        display: block;
+        margin-top: 0.55rem;
+        color: var(--smoke-grey);
+        font-size: 0.78rem;
+        line-height: 1.5;
+    }
+
+    .topic-form .errorlist {
+        padding: 0;
+        margin: 0 0 0.75rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        list-style: none;
+    }
+
+    .form-actions {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .form-note {
+        display: flex;
+        align-items: center;
+        gap: 0.6rem;
+        margin: 0;
+        color: var(--smoke-grey);
+        font-size: 0.78rem;
+        line-height: 1.5;
+    }
+
+    .form-note i {
+        color: var(--hardwood-amber);
+    }
+
+    .submit-button {
+        position: relative;
+        display: inline-flex;
+        flex-shrink: 0;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+        padding: 0.9rem 1.2rem;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        background: var(--net-orange);
+        border: 1px solid var(--net-orange);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        transition:
+            color 250ms ease,
+            background 250ms ease,
+            border-color 250ms ease,
+            transform 250ms ease;
+    }
+
+    .submit-button::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: var(--hardwood-amber);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 300ms ease;
+    }
+
+    .submit-button:hover {
+        color: var(--court-black);
+        background: var(--hardwood-amber);
+        border-color: var(--hardwood-amber);
+        transform: translateY(-4px);
+    }
+
+    .submit-button:hover::after,
+    .submit-button:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    .submit-button:focus-visible {
+        outline: 2px solid var(--hardwood-amber);
+        outline-offset: 4px;
+    }
+
+    .guidance-panel {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .guidance-title {
+        margin-bottom: 1.5rem;
+        font-size: clamp(2rem, 4vw, 2.8rem);
+    }
+
+    .guidance-item {
+        display: grid;
+        grid-template-columns: 2.5rem minmax(0, 1fr);
+        gap: 1rem;
+        padding: 1.2rem 0;
+        border-top: 1px solid var(--glass-border);
+        transition: transform 200ms ease;
+    }
+
+    .guidance-item:hover {
+        transform: translateX(4px);
+    }
+
+    .guidance-number {
+        color: var(--net-orange);
+        font-family: "Anton", sans-serif;
+        font-size: 1.5rem;
+        line-height: 1;
+    }
+
+    .guidance-item h3 {
+        margin: 0 0 0.4rem;
+        color: var(--chalk-white);
+        font-size: 0.92rem;
+        font-weight: 600;
+        line-height: 1.4;
+    }
+
+    .guidance-item p {
+        margin: 0;
+        color: var(--smoke-grey);
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+
+    .next-step-card {
+        display: grid;
+        gap: 0.55rem;
+        margin-top: auto;
+        padding: 1.1rem;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-left: 2px solid var(--net-orange);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .next-step-card strong {
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+    }
+
+    .next-step-card span {
+        color: var(--smoke-grey);
+        font-size: 0.8rem;
+        line-height: 1.6;
+    }
+
+    .reveal,
+    .reveal-delay {
+        animation: createTopicFadeUp 550ms ease-out both;
+    }
+
+    .reveal-delay {
+        animation-delay: 80ms;
+    }
+
+    @keyframes createTopicFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .step-indicator {
+            width: fit-content;
+        }
+
+        .guidance-panel {
+            margin-top: 0;
+        }
+
+        .next-step-card {
+            margin-top: 1rem;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .create-topic-page {
+            padding-top: 2rem;
+        }
+
+        .page-header,
+        .form-panel,
+        .guidance-panel {
+            padding: 1.5rem;
+        }
+
+        .form-panel-header,
+        .form-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .form-icon {
+            display: none;
+        }
+
+        .submit-button {
+            width: 100%;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .create-topic-page *,
+        .create-topic-page *::before,
+        .create-topic-page *::after {
+            animation-duration: 1ms !important;
+            animation-delay: 0ms !important;
+            transition-duration: 200ms !important;
+        }
+
+        .submit-button:hover,
+        .guidance-item:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<main class="create-topic-page">
+    <div class="page-shell">
+
+        <header class="gloss-panel page-header reveal">
+            <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-end gap-3">
+                <div>
+                    <p class="page-kicker">
+                        <i class="bi bi-stars" aria-hidden="true"></i>
+                        Start an Investigation
+                    </p>
+
+                    <h1 class="page-title">
+                        Turn one basketball lesson into focused topics.
+                    </h1>
+
+                    <p class="page-description">
+                        Describe the principle, problem, or hidden part of the game
+                        you want to explain. The system will use your lesson to create
+                        clear, thought-provoking topic directions.
+                    </p>
+                </div>
+
+                <div class="step-indicator" aria-label="Step 1: Lesson description">
+                    <span>01</span>
+                    Lesson description
+                </div>
+            </div>
+        </header>
+
+        <div class="content-shell">
+            <div class="row g-3 align-items-stretch">
+
+                <div class="col-lg-8">
+                    <section class="gloss-panel form-panel reveal-delay">
+                        <div class="form-panel-header">
+                            <div>
+                                <h2 class="form-panel-title">
+                                    Define the lesson
+                                </h2>
+
+                                <p class="form-panel-copy">
+                                    Give the system enough detail to discover the
+                                    strongest concepts, conflicts, and teaching
+                                    opportunities.
+                                </p>
+                            </div>
+
+                            <div class="form-icon" aria-hidden="true">
+                                <i class="bi bi-lightbulb"></i>
+                            </div>
+                        </div>
+
+                        <form method="post" class="topic-form">
+                            {% csrf_token %}
+                            {{ form.as_p }}
+
+                            <div class="form-actions">
+                                <p class="form-note">
+                                    <i class="bi bi-shield-check" aria-hidden="true"></i>
+                                    Your lesson remains editable before publication.
+                                </p>
+
+                                <button type="submit" class="submit-button">
+                                    <i class="bi bi-magic" aria-hidden="true"></i>
+                                    Generate Topics
+                                </button>
+                            </div>
+                        </form>
+                    </section>
+                </div>
+
+                <div class="col-lg-4">
+                    <aside class="gloss-panel guidance-panel reveal-delay">
+                        <p class="guidance-kicker">
+                            Better Input
+                        </p>
+
+                        <h2 class="guidance-title">
+                            What makes a strong lesson description?
+                        </h2>
+
+                        <div class="guidance-item">
+                            <span class="guidance-number">01</span>
+
+                            <div>
+                                <h3>Describe the visible problem</h3>
+                                <p>
+                                    Explain what players, coaches, or parents commonly see.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guidance-item">
+                            <span class="guidance-number">02</span>
+
+                            <div>
+                                <h3>Reveal what is misunderstood</h3>
+                                <p>
+                                    Identify the assumption or habit that hides the real lesson.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guidance-item">
+                            <span class="guidance-number">03</span>
+
+                            <div>
+                                <h3>Connect it to the system</h3>
+                                <p>
+                                    Show how the idea affects timing, space, decisions,
+                                    or development.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="guidance-item">
+                            <span class="guidance-number">04</span>
+
+                            <div>
+                                <h3>State the desired understanding</h3>
+                                <p>
+                                    Clarify what the audience should recognize after learning it.
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="next-step-card">
+                            <strong>Next stage</strong>
+
+                            <span>
+                                After generation, you will compare the topic options
+                                and choose the direction that best communicates the lesson.
+                            </span>
+                        </div>
+                    </aside>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</main>
+{% endblock %}

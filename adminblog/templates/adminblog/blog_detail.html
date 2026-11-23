@@ -1,0 +1,662 @@
+{% extends "adminblog/base.html" %}
+
+{% block title %}{{ blog.name }} | Courtside{% endblock %}
+
+{% block content %}
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+
+    .blog-detail-page {
+        --court-black: #0b0d10;
+        --charcoal-panel: #15181d;
+        --glass-white: rgba(255, 255, 255, 0.06);
+        --glass-strong: rgba(255, 255, 255, 0.09);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --net-orange: #d9622b;
+        --hardwood-amber: #e8a33d;
+        --chalk-white: #f4f2ec;
+        --smoke-grey: #959aa1;
+
+        min-height: 100vh;
+        margin-inline: calc(50% - 50vw);
+        padding: 3rem 1rem 6rem;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "Inter", sans-serif;
+        background:
+            radial-gradient(circle at 90% 7%, rgba(217, 98, 43, 0.2), transparent 25rem),
+            radial-gradient(circle at 7% 78%, rgba(232, 163, 61, 0.08), transparent 27rem),
+            repeating-linear-gradient(90deg, transparent 0, transparent 9.95%, rgba(255, 255, 255, 0.022) 10%),
+            var(--court-black);
+    }
+
+    .blog-detail-page *,
+    .blog-detail-page *::before,
+    .blog-detail-page *::after {
+        box-sizing: border-box;
+    }
+
+    .article-shell {
+        width: min(100%, 1180px);
+        margin: 0 auto;
+    }
+
+    .gloss-panel {
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .back-link {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 1rem;
+        color: var(--smoke-grey);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-decoration: none;
+        text-transform: uppercase;
+        transition: color 200ms ease, transform 200ms ease;
+    }
+
+    .back-link:hover {
+        color: var(--hardwood-amber);
+        transform: translateX(-4px);
+    }
+
+    .article-hero {
+        position: relative;
+        padding: clamp(2rem, 6vw, 5rem);
+        overflow: hidden;
+        animation: articleFadeUp 550ms ease-out both;
+    }
+
+    .article-hero::before {
+        position: absolute;
+        top: -11rem;
+        right: -9rem;
+        width: 30rem;
+        height: 30rem;
+        content: "";
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        box-shadow: 0 0 0 3rem rgba(255, 255, 255, 0.018), 0 0 0 7rem rgba(255, 255, 255, 0.012);
+        pointer-events: none;
+    }
+
+    .article-hero::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: linear-gradient(90deg, var(--net-orange), var(--hardwood-amber), transparent 80%);
+    }
+
+    .article-kicker,
+    .summary-label,
+    .sidebar-kicker,
+    .footer-kicker {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.65rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.69rem;
+        font-weight: 600;
+        letter-spacing: 0.13em;
+        text-transform: uppercase;
+    }
+
+    .article-kicker {
+        margin: 0 0 1rem;
+    }
+
+    .article-kicker::before {
+        width: 2.5rem;
+        height: 2px;
+        content: "";
+        background: var(--net-orange);
+    }
+
+    .article-title {
+        position: relative;
+        max-width: 940px;
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(3rem, 7vw, 6.4rem);
+        font-weight: 400;
+        line-height: 0.95;
+        letter-spacing: -0.035em;
+        text-transform: uppercase;
+    }
+
+    .article-subtitle {
+        position: relative;
+        max-width: 780px;
+        margin: 1.4rem 0 0;
+        color: var(--smoke-grey);
+        font-size: 1rem;
+        line-height: 1.75;
+    }
+
+    .article-meta {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem;
+        margin-top: 1.75rem;
+    }
+
+    .meta-chip {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        padding: 0.55rem 0.75rem;
+        color: var(--smoke-grey);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.67rem;
+        font-weight: 600;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 999px;
+    }
+
+    .meta-chip i,
+    .meta-chip--accent {
+        color: var(--hardwood-amber);
+    }
+
+    .status-dot {
+        width: 0.42rem;
+        height: 0.42rem;
+        background: var(--net-orange);
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px rgba(217, 98, 43, 0.12);
+    }
+
+    .article-layout {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) 290px;
+        gap: 1rem;
+        align-items: start;
+        margin-top: 1rem;
+    }
+
+    .content-panel,
+    .sidebar-panel,
+    .article-footer {
+        animation: articleFadeUp 550ms 80ms ease-out both;
+    }
+
+    .content-panel {
+        padding: clamp(1.5rem, 4vw, 3.25rem);
+    }
+
+    .summary-panel {
+        position: relative;
+        margin-bottom: 2rem;
+        padding: 1.4rem 1.5rem;
+        overflow: hidden;
+        background: var(--glass-strong);
+        border: 1px solid var(--glass-border);
+        border-left: 2px solid var(--net-orange);
+        border-radius: 14px;
+    }
+
+    .summary-label {
+        margin-bottom: 0.75rem;
+    }
+
+    .summary-text {
+        color: var(--chalk-white);
+        font-size: 1rem;
+        font-weight: 600;
+        line-height: 1.75;
+    }
+
+    .summary-text p:last-child,
+    .article-content p:last-child {
+        margin-bottom: 0;
+    }
+
+    .article-content {
+        color: #c4c7cb;
+        font-size: 1.02rem;
+        line-height: 1.92;
+    }
+
+    .article-content p {
+        margin-bottom: 1.45rem;
+    }
+
+    .article-content p:first-child::first-letter {
+        float: left;
+        margin: 0.1rem 0.55rem 0 0;
+        color: var(--net-orange);
+        font-family: "Anton", sans-serif;
+        font-size: 4.6rem;
+        line-height: 0.78;
+    }
+
+    .article-content strong {
+        color: var(--chalk-white);
+    }
+
+    .article-content a {
+        color: var(--hardwood-amber);
+        font-weight: 600;
+        text-underline-offset: 3px;
+    }
+
+    .article-content ul,
+    .article-content ol {
+        margin-bottom: 1.5rem;
+        padding-left: 1.4rem;
+    }
+
+    .article-content li {
+        margin-bottom: 0.55rem;
+    }
+
+    .article-content blockquote {
+        margin: 2rem 0;
+        padding: 1.25rem 1.4rem;
+        color: var(--chalk-white);
+        font-weight: 600;
+        line-height: 1.75;
+        background: rgba(232, 163, 61, 0.08);
+        border-left: 3px solid var(--hardwood-amber);
+        border-radius: 0 14px 14px 0;
+    }
+
+    .sidebar-panel {
+        position: sticky;
+        top: 1rem;
+        padding: 1.35rem;
+    }
+
+    .sidebar-kicker {
+        margin: 0 0 0.55rem;
+    }
+
+    .sidebar-title {
+        margin: 0 0 1rem;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: 1.85rem;
+        font-weight: 400;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+
+    .framework-item {
+        display: grid;
+        grid-template-columns: 2.4rem minmax(0, 1fr);
+        gap: 0.8rem;
+        padding: 1rem 0;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .framework-icon {
+        display: grid;
+        width: 2.4rem;
+        height: 2.4rem;
+        place-items: center;
+        color: var(--hardwood-amber);
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 10px;
+    }
+
+    .framework-item strong {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--chalk-white);
+        font-size: 0.82rem;
+    }
+
+    .framework-item p {
+        margin: 0;
+        color: var(--smoke-grey);
+        font-size: 0.75rem;
+        line-height: 1.55;
+    }
+
+    .sidebar-action,
+    .primary-action,
+    .secondary-action {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.55rem;
+        min-height: 44px;
+        padding: 0.8rem 1rem;
+        color: var(--chalk-white);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.07em;
+        text-decoration: none;
+        text-transform: uppercase;
+        border-radius: 12px;
+        transition: color 220ms ease, background 220ms ease, border-color 220ms ease, transform 220ms ease;
+    }
+
+    .sidebar-action {
+        width: 100%;
+        margin-top: 0.75rem;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+    }
+
+    .sidebar-action:hover,
+    .secondary-action:hover {
+        color: var(--hardwood-amber);
+        background: var(--glass-strong);
+        border-color: rgba(232, 163, 61, 0.35);
+        transform: translateY(-3px);
+    }
+
+    .article-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1.5rem;
+        margin-top: 1rem;
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+    }
+
+    .footer-kicker {
+        margin: 0 0 0.65rem;
+    }
+
+    .footer-title {
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(1.8rem, 4vw, 2.7rem);
+        font-weight: 400;
+        line-height: 1;
+        text-transform: uppercase;
+    }
+
+    .footer-copy {
+        max-width: 680px;
+        margin: 0.7rem 0 0;
+        color: var(--smoke-grey);
+        font-size: 0.84rem;
+        line-height: 1.65;
+    }
+
+    .footer-actions {
+        display: flex;
+        flex-shrink: 0;
+        gap: 0.65rem;
+    }
+
+    .primary-action {
+        color: var(--chalk-white);
+        background: var(--net-orange);
+        border: 1px solid var(--net-orange);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .primary-action:hover {
+        color: var(--court-black);
+        background: var(--hardwood-amber);
+        border-color: var(--hardwood-amber);
+        transform: translateY(-3px);
+    }
+
+    .secondary-action {
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+    }
+
+    .back-link:focus-visible,
+    .sidebar-action:focus-visible,
+    .primary-action:focus-visible,
+    .secondary-action:focus-visible {
+        outline: 2px solid var(--hardwood-amber);
+        outline-offset: 4px;
+    }
+
+    @keyframes articleFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .article-layout {
+            grid-template-columns: 1fr;
+        }
+
+        .sidebar-panel {
+            position: relative;
+            top: auto;
+        }
+
+        .article-footer {
+            align-items: stretch;
+            flex-direction: column;
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .blog-detail-page {
+            padding-top: 2rem;
+        }
+
+        .article-hero,
+        .content-panel,
+        .sidebar-panel,
+        .article-footer {
+            padding: 1.5rem;
+        }
+
+        .article-meta,
+        .footer-actions {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .meta-chip,
+        .primary-action,
+        .secondary-action {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .article-content {
+            font-size: 0.98rem;
+            line-height: 1.82;
+        }
+
+        .article-content p:first-child::first-letter {
+            font-size: 3.7rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .blog-detail-page *,
+        .blog-detail-page *::before,
+        .blog-detail-page *::after {
+            animation-duration: 1ms !important;
+            animation-delay: 0ms !important;
+            transition-duration: 200ms !important;
+        }
+
+        .back-link:hover,
+        .sidebar-action:hover,
+        .primary-action:hover,
+        .secondary-action:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<main class="blog-detail-page">
+    <div class="article-shell">
+        <a href="{% url 'adminblog:blog_list' %}" class="back-link">
+            <i class="bi bi-arrow-left" aria-hidden="true"></i>
+            Back to Published Blogs
+        </a>
+
+        <article>
+            <header class="gloss-panel article-hero">
+                <p class="article-kicker">
+                    <i class="bi bi-journal-text" aria-hidden="true"></i>
+                    Basketball Knowledge Article
+                </p>
+
+                <h1 class="article-title">{{ blog.name }}</h1>
+
+                {% if blog.title %}
+                    <p class="article-subtitle">{{ blog.title }}</p>
+                {% endif %}
+
+                <div class="article-meta" aria-label="Article information">
+                    {% if blog.category %}
+                        <span class="meta-chip meta-chip--accent">
+                            <i class="bi bi-tag" aria-hidden="true"></i>
+                            {{ blog.category }}
+                        </span>
+                    {% endif %}
+
+                    {% if blog.author %}
+                        <span class="meta-chip">
+                            <i class="bi bi-person" aria-hidden="true"></i>
+                            {{ blog.author }}
+                        </span>
+                    {% endif %}
+
+                    {% if blog.date %}
+                        <time class="meta-chip" datetime="{{ blog.date|date:'Y-m-d' }}">
+                            <i class="bi bi-calendar3" aria-hidden="true"></i>
+                            {{ blog.date|date:"F j, Y" }}
+                        </time>
+                    {% endif %}
+
+                    <span class="meta-chip">
+                        <span class="status-dot" aria-hidden="true"></span>
+                        Published
+                    </span>
+                </div>
+            </header>
+
+            <div class="article-layout">
+                <section class="gloss-panel content-panel">
+                    {% if blog.summary %}
+                        <div class="summary-panel">
+                            <span class="summary-label">
+                                <i class="bi bi-lightbulb" aria-hidden="true"></i>
+                                Central Lesson
+                            </span>
+
+                            <div class="summary-text">
+                                {{ blog.summary|linebreaks }}
+                            </div>
+                        </div>
+                    {% endif %}
+
+                    {% if blog.image %}
+                        <div class="article-image">
+                            <img
+                                src="{{ blog.image.url }}"
+                                alt="{{ blog.name }}"
+                                class="article-cover"
+                            >
+                        </div>
+                    {% endif %}
+                    <div class="article-content">
+                        {{ blog.content|linebreaks }}
+                    </div>
+                </section>
+
+                <aside class="gloss-panel sidebar-panel">
+                    <p class="sidebar-kicker">Article Framework</p>
+                    <h2 class="sidebar-title">Built for clear understanding</h2>
+
+                    <div class="framework-item">
+                        <span class="framework-icon">
+                            <i class="bi bi-search" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <strong>Investigation</strong>
+                            <p>Begins with a focused basketball question.</p>
+                        </div>
+                    </div>
+
+                    <div class="framework-item">
+                        <span class="framework-icon">
+                            <i class="bi bi-diagram-3" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <strong>Systems</strong>
+                            <p>Connects actions, decisions, and consequences.</p>
+                        </div>
+                    </div>
+
+                    <div class="framework-item">
+                        <span class="framework-icon">
+                            <i class="bi bi-bullseye" aria-hidden="true"></i>
+                        </span>
+                        <div>
+                            <strong>Development</strong>
+                            <p>Turns knowledge into repeatable application.</p>
+                        </div>
+                    </div>
+
+                    <a href="{% url 'adminblog:blog_list' %}" class="sidebar-action">
+                        <i class="bi bi-journals" aria-hidden="true"></i>
+                        Browse More Articles
+                    </a>
+                </aside>
+            </div>
+
+            <footer class="gloss-panel article-footer">
+                <div>
+                    <p class="footer-kicker">Continue Building</p>
+                    <h2 class="footer-title">Turn the next idea into a complete lesson.</h2>
+                    <p class="footer-copy">
+                        Begin with the concept, investigate the gaps, and build the message
+                        until it carries through the entire game.
+                    </p>
+                </div>
+
+                <div class="footer-actions">
+                    {% if admin %}
+                        <a href="{% url 'adminblog:create_topic' %}" class="primary-action">
+                            <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                            Create New Topic
+                        </a>
+                    {% endif %}
+
+                    <a href="{% url 'adminblog:blog_list' %}" class="secondary-action">
+                        <i class="bi bi-journal-richtext" aria-hidden="true"></i>
+                        View All Blogs
+                    </a>
+                </div>
+            </footer>
+        </article>
+    </div>
+</main>
+{% endblock %}

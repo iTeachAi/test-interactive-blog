@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %} {% endblock %}</title>
+    <style>
+        .processing-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 9999;
+            display: none;
+            place-items: center;
+            padding: 1rem;
+            color: #f4f2ec;
+            background:
+                radial-gradient(
+                    circle at center,
+                    rgba(217, 98, 43, 0.18),
+                    transparent 35%
+                ),
+                rgba(11, 13, 16, 0.96);
+            backdrop-filter: blur(12px);
+        }
+
+        .processing-overlay.is-visible {
+            display: grid;
+        }
+
+        .processing-overlay__card {
+            width: min(100%, 480px);
+            padding: 3rem 2rem;
+            text-align: center;
+            background: #15181d;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            border-radius: 16px;
+            box-shadow: 0 24px 70px rgba(0, 0, 0, 0.55);
+        }
+
+        .processing-overlay__basketball {
+            margin-bottom: 1rem;
+            font-size: 4rem;
+            animation: basketballBounce 850ms ease-in-out infinite;
+        }
+
+        .processing-overlay__label {
+            color: #e8a33d;
+            font-size: 0.72rem;
+            font-weight: 700;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+        }
+
+        .processing-overlay__card h2 {
+            margin: 0.5rem 0 1rem;
+            font-size: clamp(1.8rem, 5vw, 2.8rem);
+            text-transform: uppercase;
+        }
+
+        .processing-overlay__card p {
+            color: #a7abb0;
+            line-height: 1.6;
+        }
+
+        .processing-overlay__progress {
+            height: 5px;
+            margin: 2rem 0 1rem;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+        }
+
+        .processing-overlay__progress span {
+            display: block;
+            width: 40%;
+            height: 100%;
+            background: #d9622b;
+            border-radius: inherit;
+            animation: processingProgress 1.4s ease-in-out infinite;
+        }
+
+        .processing-overlay__notice {
+            margin-bottom: 0;
+            font-size: 0.8rem;
+        }
+
+        @keyframes basketballBounce {
+            0%,
+            100% {
+                transform: translateY(0) rotate(0deg);
+            }
+
+            50% {
+                transform: translateY(-16px) rotate(30deg);
+            }
+        }
+
+        @keyframes processingProgress {
+            from {
+                transform: translateX(-120%);
+            }
+
+            to {
+                transform: translateX(350%);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .processing-overlay__basketball,
+            .processing-overlay__progress span {
+                animation: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    {% block content %} {% endblock %}
+    <div
+        id="processing-overlay"
+        class="processing-overlay"
+        role="status"
+        aria-live="polite"
+        aria-hidden="true"
+    >
+        <div class="processing-overlay__card">
+            <div class="processing-overlay__basketball" aria-hidden="true">
+                🏀
+            </div>
+
+            <p class="processing-overlay__label">
+                Full Court Press
+            </p>
+
+            <h2 id="processing-title">
+                Processing your request
+            </h2>
+
+            <p id="processing-message">
+                We’re sending your information to the coaching team.
+            </p>
+
+            <div class="processing-overlay__progress" aria-hidden="true">
+                <span></span>
+            </div>
+
+            <p class="processing-overlay__notice">
+                Please keep this page open.
+            </p>
+        </div>
+    </div>
+
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const overlay = document.getElementById("processing-overlay");
+        const title = document.getElementById("processing-title");
+        const message = document.getElementById("processing-message");
+
+        if (!overlay || !title || !message) {
+            return;
+        }
+
+        document
+            .querySelectorAll("[data-processing-form]")
+            .forEach(function (form) {
+                form.addEventListener("submit", function (event) {
+                    // Allow browser validation messages to appear first.
+                    if (!form.checkValidity()) {
+                        return;
+                    }
+
+                    title.textContent =
+                        form.dataset.processingTitle ||
+                        "Processing your request";
+
+                    message.textContent =
+                        form.dataset.processingMessage ||
+                        "This may take a few moments.";
+
+                    overlay.classList.add("is-visible");
+                    overlay.setAttribute("aria-hidden", "false");
+
+                    const submitButton = form.querySelector(
+                        'button[type="submit"], input[type="submit"]'
+                    );
+
+                    if (submitButton) {
+                        submitButton.disabled = true;
+                        submitButton.setAttribute(
+                            "aria-disabled",
+                            "true"
+                        );
+                    }
+                });
+            });
+
+        // Restore the screen if the browser returns from its back-forward cache.
+        window.addEventListener("pageshow", function () {
+            overlay.classList.remove("is-visible");
+            overlay.setAttribute("aria-hidden", "true");
+
+            document
+                .querySelectorAll("[data-processing-form]")
+                .forEach(function (form) {
+                    const submitButton = form.querySelector(
+                        'button[type="submit"], input[type="submit"]'
+                    );
+
+                    if (submitButton) {
+                        submitButton.disabled = false;
+                        submitButton.removeAttribute("aria-disabled");
+                    }
+                });
+        });
+    });
+</script>
+</body>
+</html>

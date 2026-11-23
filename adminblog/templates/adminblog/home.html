@@ -1,0 +1,263 @@
+{% extends "adminblog/base.html" %}
+
+{% block title %}Basketball Intelligence Lab{% endblock %}
+
+{% block nav %}
+<div class="d-flex align-items-center gap-2">
+    <a href="{% url 'adminblog:create_topic' %}" class="btn dashboard-btn dashboard-btn-primary"><i class="bi bi-plus-lg"></i> New Investigation</a>
+    <a href="{% url 'adminblog:blog_list' %}" class="btn dashboard-btn dashboard-btn-secondary"><i class="bi bi-collection"></i> Library</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+
+    /* Courtside design tokens */
+    :root {
+        --court-black: #0B0D10;
+        --charcoal-panel: #15181D;
+        --glass-white: rgba(255,255,255,0.06);
+        --glass-border: rgba(255,255,255,0.12);
+        --net-orange: #D9622B;
+        --hardwood-amber: #E8A33D;
+        --chalk-white: #F4F2EC;
+        --smoke-grey: #8B9096;
+        --lab-radius: 14px;
+        --lab-shadow: 0 8px 30px rgba(0,0,0,0.35);
+    }
+
+    .lab-dashboard {
+        position: relative;
+        min-height: 100vh;
+        overflow: hidden;
+        padding: 3rem 1.25rem 5rem;
+        margin-inline: calc(50% - 50vw);
+        color: var(--chalk-white);
+        font-family: "Inter", sans-serif;
+        background:
+            radial-gradient(circle at 8% 4%, rgba(217,98,43,.18), transparent 24rem),
+            radial-gradient(circle at 94% 16%, rgba(232,163,61,.10), transparent 27rem),
+            var(--court-black);
+    }
+
+    .lab-dashboard::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: .7;
+        background-image:
+            linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+            linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+        background-size: 42px 42px;
+    }
+
+    .dashboard-shell {
+        position: relative;
+        z-index: 1;
+        width: 100%;
+        max-width: 1180px;
+        margin-inline: auto;
+    }
+
+    .lab-panel {
+        position: relative;
+        overflow: hidden;
+        border: 1px solid var(--glass-border);
+        border-radius: var(--lab-radius);
+        background: var(--glass-white);
+        box-shadow: var(--lab-shadow);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        animation: courtsideFadeUp 550ms ease-out both;
+    }
+
+    .lab-panel::before {
+        content: "";
+        position: absolute;
+        top: -75%;
+        left: -28%;
+        width: 52%;
+        height: 230%;
+        transform: rotate(20deg);
+        pointer-events: none;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,.06), transparent);
+    }
+
+    .dashboard-header { padding: 1.6rem 1.8rem; margin-bottom: 1.25rem; }
+    .dashboard-brand-icon { display: grid; flex: 0 0 50px; width: 50px; height: 50px; place-items: center; border-radius: var(--lab-radius); color: var(--chalk-white); background: var(--net-orange); box-shadow: var(--lab-shadow); font-size: 1.2rem; }
+    .dashboard-kicker, .section-kicker { margin: 0 0 .35rem; color: var(--hardwood-amber); font-family: "JetBrains Mono", monospace; font-size: .7rem; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; }
+    .dashboard-title { margin: 0; font-family: "Anton", sans-serif; font-size: clamp(2.2rem, 5vw, 4rem); font-weight: 400; line-height: 1; letter-spacing: -.035em; text-transform: uppercase; }
+    .dashboard-description, .section-description { max-width: 650px; margin: .5rem 0 0; color: var(--smoke-grey); font-size: .9rem; line-height: 1.58; }
+
+    .dashboard-action, .compact-link-button, .investigation-open-button, .workflow-start-button {
+        position: relative; display: inline-flex; align-items: center; justify-content: center; gap: .5rem; overflow: hidden; border-radius: var(--lab-radius); font-family: "JetBrains Mono", monospace; font-size: .72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; text-decoration: none; transition: transform .25s ease, color .25s ease, border-color .25s ease, background .25s ease;
+    }
+    .dashboard-action { min-height: 44px; padding: .7rem 1rem; }
+    .dashboard-action:hover, .compact-link-button:hover, .investigation-open-button:hover, .workflow-start-button:hover { transform: translateY(-4px); }
+    .dashboard-action-primary, .workflow-start-button { border: 1px solid var(--net-orange); color: var(--chalk-white); background: var(--net-orange); box-shadow: var(--lab-shadow); }
+    .dashboard-action-primary:hover, .workflow-start-button:hover { color: var(--court-black); border-color: var(--hardwood-amber); background: var(--hardwood-amber); }
+    .dashboard-action-secondary { border: 1px solid var(--glass-border); color: var(--chalk-white); background: var(--glass-white); }
+    .dashboard-action-secondary:hover { color: var(--hardwood-amber); border-color: var(--hardwood-amber); background: var(--glass-white); }
+
+    .metric-card { position: relative; overflow: hidden; height: 100%; display: flex; align-items: center; gap: .85rem; padding: 1rem; border: 1px solid var(--glass-border); border-radius: var(--lab-radius); background: var(--glass-white); box-shadow: var(--lab-shadow); backdrop-filter: blur(16px); animation: courtsideFadeUp 550ms ease-out both; }
+    .metric-card-icon { display: grid; flex: 0 0 42px; width: 42px; height: 42px; place-items: center; border-radius: var(--lab-radius); color: var(--chalk-white); background: var(--net-orange); }
+    .metric-card-value { display: block; color: var(--chalk-white); font-family: "Anton", sans-serif; font-size: 1.65rem; font-weight: 400; line-height: 1; }
+    .metric-card-label { display: block; margin-top: .25rem; color: var(--smoke-grey); font-family: "JetBrains Mono", monospace; font-size: .65rem; text-transform: uppercase; }
+
+    .dashboard-section, .workflow-panel { padding: 1.45rem; }
+    .dashboard-section-header, .workflow-panel-header { position: relative; display: flex; align-items: flex-start; justify-content: space-between; gap: 1rem; padding-bottom: 1rem; border-bottom: 1px solid var(--glass-border); }
+    .section-title, .workflow-panel-title { margin: 0; color: var(--chalk-white); font-family: "Anton", sans-serif; font-size: 1.5rem; font-weight: 400; text-transform: uppercase; }
+    .compact-link-button { padding: .5rem .75rem; border: 1px solid var(--glass-border); color: var(--chalk-white); background: var(--glass-white); }
+    .compact-link-button:hover { color: var(--hardwood-amber); border-color: var(--hardwood-amber); }
+
+    .investigation-list { display: grid; gap: .8rem; padding-top: 1rem; }
+    .investigation-item { position: relative; display: grid; grid-template-columns: 44px minmax(0,1fr); gap: .9rem; padding: 1rem; overflow: hidden; border: 1px solid var(--glass-border); border-radius: var(--lab-radius); background: var(--glass-white); transition: transform .3s ease, border-color .3s ease, background .3s ease; animation: courtsideFadeUp 550ms ease-out both; animation-delay: calc(var(--item-index, 0) * 80ms); }
+    .investigation-item::after { position: absolute; right: 0; bottom: 0; left: 0; height: 2px; content: ""; background: var(--net-orange); transform: scaleX(0); transform-origin: left; transition: transform .3s ease; }
+    .investigation-item:hover { transform: translateY(-4px); border-color: var(--glass-border); background: rgba(255,255,255,.12); }
+    .investigation-item:hover::after { transform: scaleX(1); }
+    .investigation-number { display: grid; width: 44px; height: 44px; place-items: center; border-radius: var(--lab-radius); color: var(--net-orange); background: var(--charcoal-panel); font-family: "Anton", sans-serif; font-size: 1.1rem; font-weight: 400; }
+    .investigation-heading-row, .investigation-footer { display: flex; align-items: center; justify-content: space-between; gap: 1rem; }
+    .investigation-label { color: var(--hardwood-amber); font-family: "JetBrains Mono", monospace; font-size: .66rem; font-weight: 600; letter-spacing: .09em; text-transform: uppercase; }
+    .investigation-title { margin: .15rem 0 0; color: var(--chalk-white); font-family: "Anton", sans-serif; font-size: 1.25rem; font-weight: 400; text-transform: uppercase; }
+    .investigation-status, .workflow-system-status { display: inline-flex; align-items: center; gap: .4rem; border: 1px solid var(--glass-border); border-radius: 999px; padding: .35rem .58rem; color: var(--hardwood-amber); background: var(--glass-white); font-family: "JetBrains Mono", monospace; font-size: .62rem; font-weight: 600; text-transform: uppercase; }
+    .investigation-description { margin: .5rem 0 .75rem; color: var(--smoke-grey); font-size: .78rem; line-height: 1.5; }
+    .investigation-meta { color: var(--smoke-grey); font-family: "JetBrains Mono", monospace; font-size: .65rem; }
+    .investigation-open-button { padding: .47rem .7rem; color: var(--chalk-white); border: 1px solid var(--net-orange); background: var(--net-orange); }
+    .investigation-open-button:hover { color: var(--court-black); border-color: var(--hardwood-amber); background: var(--hardwood-amber); }
+
+    .workflow-list { display: grid; gap: .65rem; padding: 1rem 0; }
+    .workflow-item { display: grid; grid-template-columns: 30px minmax(0,1fr) 36px; align-items: center; gap: .75rem; padding: .78rem; border: 1px solid var(--glass-border); border-radius: var(--lab-radius); background: var(--glass-white); }
+    .workflow-item-number { color: var(--net-orange); font-family: "JetBrains Mono", monospace; font-size: .66rem; font-weight: 600; }
+    .workflow-item-title { margin: 0; color: var(--chalk-white); font-size: .8rem; font-weight: 700; }
+    .workflow-item-description { margin: .18rem 0 0; color: var(--smoke-grey); font-size: .68rem; line-height: 1.4; }
+    .workflow-item-icon { display: grid; width: 36px; height: 36px; place-items: center; border-radius: var(--lab-radius); color: var(--chalk-white); background: var(--net-orange); }
+
+    .workflow-progress-panel { margin-bottom: .9rem; padding: .9rem; border: 1px solid var(--glass-border); border-radius: var(--lab-radius); background: var(--charcoal-panel); }
+    .workflow-progress-heading { display: flex; justify-content: space-between; gap: 1rem; color: var(--chalk-white); font-family: "JetBrains Mono", monospace; font-size: .68rem; text-transform: uppercase; }
+    .workflow-progress-track { height: 6px; margin: .65rem 0; overflow: hidden; border-radius: 999px; background: var(--glass-white); }
+    .workflow-progress-fill { width: 100%; height: 100%; background: linear-gradient(90deg, var(--net-orange), var(--hardwood-amber)); }
+    .workflow-progress-description { margin: 0; color: var(--smoke-grey); font-size: .68rem; line-height: 1.45; }
+    .workflow-start-button { width: 100%; min-height: 44px; padding: .7rem 1rem; }
+
+    .dashboard-empty-state { padding: 3rem 1rem; text-align: center; }
+    .empty-state-icon { display: grid; width: 54px; height: 54px; place-items: center; margin: 0 auto 1rem; border-radius: var(--lab-radius); color: var(--chalk-white); background: var(--net-orange); box-shadow: var(--lab-shadow); font-size: 1.3rem; }
+    .empty-state-title { margin: 0 0 .5rem; color: var(--chalk-white); font-family: "Anton", sans-serif; font-size: 1.6rem; font-weight: 400; text-transform: uppercase; }
+    .empty-state-description { max-width: 520px; margin: 0 auto 1rem; color: var(--smoke-grey); font-size: .82rem; line-height: 1.55; }
+
+    @keyframes courtsideFadeUp { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+
+    @media (max-width: 991.98px) {
+        .lab-dashboard { padding: 2rem 1rem 4rem; }
+        .dashboard-header { padding: 1.4rem; }
+    }
+
+    @media (max-width: 575.98px) {
+        .lab-dashboard { padding: 1rem .75rem 3rem; }
+        .dashboard-header, .dashboard-section, .workflow-panel { padding: 1rem; }
+        .investigation-item { grid-template-columns: 1fr; }
+        .investigation-number { width: 38px; height: 38px; }
+        .investigation-heading-row, .investigation-footer { align-items: flex-start; }
+        .lab-panel { border-radius: var(--lab-radius); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .lab-dashboard *, .lab-dashboard *::before, .lab-dashboard *::after { animation-duration: 1ms !important; animation-delay: 0ms !important; transition-duration: 200ms !important; scroll-behavior: auto !important; }
+        .dashboard-action:hover, .compact-link-button:hover, .investigation-open-button:hover, .workflow-start-button:hover, .investigation-item:hover { transform: none; }
+    }
+</style>
+
+<main class="lab-dashboard">
+    <div class="dashboard-shell">
+        <header class="dashboard-header lab-panel mb-3">
+            <div class="row align-items-center g-3">
+                <div class="col-xl-7">
+                    <div class="d-flex align-items-start gap-3">
+                        <div class="dashboard-brand-icon"><i class="bi bi-cpu"></i></div>
+                        <div>
+                            <p class="dashboard-kicker">Basketball Intelligence Lab</p>
+                            <h1 class="dashboard-title">Admin Investigation Dashboard</h1>
+                            <p class="dashboard-description">Develop one basketball principle through topic selection, five clarifying questions, and a complete published lesson.</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-5">
+                    <div class="d-flex flex-column flex-sm-row justify-content-xl-end gap-2">
+                        <a href="{% url 'adminblog:create_topic' %}" class="dashboard-action dashboard-action-primary"><i class="bi bi-plus-circle"></i> Start Investigation</a>
+                        <a href="{% url 'adminblog:blog_list' %}" class="dashboard-action dashboard-action-secondary"><i class="bi bi-journals"></i> View Blogs</a>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <section class="row g-3 mb-3">
+            <div class="col-6 col-xl-3"><div class="metric-card"><div class="metric-card-icon"><i class="bi bi-lightbulb"></i></div><div><strong class="metric-card-value">{{ topics|length }}</strong><span class="metric-card-label">Active investigations</span></div></div></div>
+            <div class="col-6 col-xl-3"><div class="metric-card"><div class="metric-card-icon"><i class="bi bi-diagram-3"></i></div><div><strong class="metric-card-value">04</strong><span class="metric-card-label">Workflow stages</span></div></div></div>
+            <div class="col-6 col-xl-3"><div class="metric-card"><div class="metric-card-icon"><i class="bi bi-question-circle"></i></div><div><strong class="metric-card-value">05</strong><span class="metric-card-label">Required questions</span></div></div></div>
+            <div class="col-6 col-xl-3"><div class="metric-card"><div class="metric-card-icon"><i class="bi bi-file-earmark-richtext"></i></div><div><strong class="metric-card-value">01</strong><span class="metric-card-label">Final article output</span></div></div></div>
+        </section>
+
+        <section class="row g-3">
+            <div class="col-lg-8">
+                <div class="lab-panel dashboard-section">
+                    <div class="dashboard-section-header">
+                        <div><p class="section-kicker">Active Research</p><h2 class="section-title">Investigation Queue</h2><p class="section-description">Open a lesson, compare its generated topics, and choose the strongest direction.</p></div>
+                        {% if topics %}<a href="{% url 'adminblog:create_topic' %}" class="compact-link-button"><i class="bi bi-plus-lg"></i> Add</a>{% endif %}
+                    </div>
+
+                    {% if topics %}
+                        <div class="investigation-list">
+                            {% for topic in topics %}
+                                <article class="investigation-item" style="--item-index: {{ forloop.counter0 }};">
+                                    <div class="investigation-number">{{ forloop.counter|stringformat:"02d" }}</div>
+                                    <div class="investigation-content">
+                                        <div class="investigation-heading-row">
+                                            <div><span class="investigation-label">Investigation</span><h3 class="investigation-title">{{ topic.name }}</h3></div>
+                                            <span class="investigation-status"><i class="bi bi-circle-fill" style="font-size: 0.35rem;"></i> Ready</span>
+                                        </div>
+                                        <p class="investigation-description">Review the generated topic directions, compare their central principles, and choose the option that best communicates the lesson.</p>
+                                        <div class="investigation-footer">
+                                            <div class="investigation-meta"><span><i class="bi bi-lightbulb me-1"></i>Generated topics available</span></div>
+                                            <a href="{% url 'adminblog:select_topic' topic.id %}" class="investigation-open-button" aria-label="Open {{ topic.name }}">Open <i class="bi bi-arrow-right"></i></a>
+                                        </div>
+                                    </div>
+                                </article>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <div class="dashboard-empty-state">
+                            <div class="empty-state-icon"><i class="bi bi-bezier2"></i></div>
+                            <p class="section-kicker mb-2">No Active Investigations</p>
+                            <h2 class="empty-state-title">Begin with one basketball principle.</h2>
+                            <p class="empty-state-description">Describe the concept or hidden part of the game you want to explain. The system will generate topic directions and guide you through five required questions.</p>
+                            <a href="{% url 'adminblog:create_topic' %}" class="dashboard-action dashboard-action-primary"><i class="bi bi-plus-circle"></i> Start First Investigation</a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <aside class="lab-panel workflow-panel">
+                    <div class="workflow-panel-header">
+                        <div><p class="section-kicker">Production System</p><h2 class="workflow-panel-title">Investigation Workflow</h2></div>
+                        <span class="workflow-system-status"><i class="bi bi-circle-fill" style="font-size: 0.35rem;"></i> Ready</span>
+                    </div>
+                    <div class="workflow-list">
+                        <div class="workflow-item"><div class="workflow-item-number">01</div><div class="workflow-item-content"><h3 class="workflow-item-title">Define the lesson</h3><p class="workflow-item-description">Enter the basketball concept, problem, or principle.</p></div><div class="workflow-item-icon"><i class="bi bi-pencil-square"></i></div></div>
+                        <div class="workflow-item"><div class="workflow-item-number">02</div><div class="workflow-item-content"><h3 class="workflow-item-title">Generate topics</h3><p class="workflow-item-description">Discover focused directions for developing the lesson.</p></div><div class="workflow-item-icon"><i class="bi bi-stars"></i></div></div>
+                        <div class="workflow-item"><div class="workflow-item-number">03</div><div class="workflow-item-content"><h3 class="workflow-item-title">Complete five questions</h3><p class="workflow-item-description">Fill the knowledge gaps needed for a complete message.</p></div><div class="workflow-item-icon"><i class="bi bi-ui-checks"></i></div></div>
+                        <div class="workflow-item"><div class="workflow-item-number">04</div><div class="workflow-item-content"><h3 class="workflow-item-title">Generate the blog</h3><p class="workflow-item-description">Turn the selected topic and answers into an article.</p></div><div class="workflow-item-icon"><i class="bi bi-file-earmark-richtext"></i></div></div>
+                    </div>
+                    <div class="workflow-progress-panel">
+                        <div class="workflow-progress-heading"><span>Workflow Standard</span><strong>4 Stages</strong></div>
+                        <div class="workflow-progress-track"><div class="workflow-progress-fill"></div></div>
+                        <p class="workflow-progress-description">Complete every stage to move from an initial principle to a finished basketball article.</p>
+                    </div>
+                    <a href="{% url 'adminblog:create_topic' %}" class="workflow-start-button"><i class="bi bi-plus-lg"></i> New Investigation</a>
+                </aside>
+            </div>
+        </section>
+    </div>
+</main>
+{% endblock %}

@@ -1,0 +1,978 @@
+{% extends "adminblog/base.html" %}
+
+{% block title %}Basketball Knowledge Library | Courtside{% endblock %}
+
+{% block content %}
+<style>
+    @import url("https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap");
+
+    .blog-library {
+        --court-black: #0b0d10;
+        --charcoal-panel: #15181d;
+        --glass-white: rgba(255, 255, 255, 0.06);
+        --glass-strong: rgba(255, 255, 255, 0.09);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --net-orange: #d9622b;
+        --hardwood-amber: #e8a33d;
+        --chalk-white: #f4f2ec;
+        --smoke-grey: #8b9096;
+
+        min-height: 100vh;
+        margin-inline: calc(50% - 50vw);
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "Inter", sans-serif;
+        background:
+            radial-gradient(circle at 88% 8%, rgba(217, 98, 43, 0.2), transparent 28%),
+            radial-gradient(circle at 8% 74%, rgba(232, 163, 61, 0.08), transparent 26%),
+            repeating-linear-gradient(
+                90deg,
+                transparent 0,
+                transparent 9.95%,
+                rgba(255, 255, 255, 0.022) 10%
+            ),
+            var(--court-black);
+    }
+
+    .blog-library *,
+    .blog-library *::before,
+    .blog-library *::after {
+        box-sizing: border-box;
+    }
+
+    .library-shell {
+        width: min(100%, 1240px);
+        margin: 0 auto;
+        padding: 4rem 1rem 6rem;
+    }
+
+    .chrome-panel {
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+    }
+
+    .library-hero {
+        position: relative;
+        padding: clamp(2rem, 5vw, 4.5rem);
+        overflow: hidden;
+    }
+
+    .library-hero::before {
+        position: absolute;
+        top: -11rem;
+        right: -9rem;
+        width: 29rem;
+        height: 29rem;
+        content: "";
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 3rem rgba(255, 255, 255, 0.018),
+            0 0 0 7rem rgba(255, 255, 255, 0.012);
+        pointer-events: none;
+    }
+
+    .library-hero::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: linear-gradient(
+            90deg,
+            var(--net-orange),
+            var(--hardwood-amber),
+            transparent 80%
+        );
+    }
+
+    .page-kicker,
+    .section-kicker,
+    .featured-label,
+    .metric-label,
+    .article-number,
+    .published-badge,
+    .category-badge,
+    .article-count {
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        font-weight: 600;
+        letter-spacing: 0.11em;
+        text-transform: uppercase;
+    }
+
+    .page-kicker {
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 0.7rem;
+        margin: 0 0 1rem;
+        color: var(--hardwood-amber);
+    }
+
+    .page-kicker::before {
+        width: 2.5rem;
+        height: 2px;
+        content: "";
+        background: var(--net-orange);
+    }
+
+    .page-title {
+        position: relative;
+        max-width: 840px;
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(3rem, 7vw, 6.25rem);
+        font-weight: 400;
+        line-height: 0.95;
+        letter-spacing: -0.035em;
+        text-transform: uppercase;
+    }
+
+    .metallic-text {
+        display: block;
+        color: var(--hardwood-amber);
+        background: linear-gradient(110deg, #f1c36d, #d9622b 56%, #f4d99e);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+
+    .page-description {
+        position: relative;
+        max-width: 720px;
+        margin: 1.5rem 0 1.75rem;
+        color: var(--smoke-grey);
+        font-size: 1rem;
+        line-height: 1.75;
+    }
+
+    .primary-action,
+    .secondary-action,
+    .featured-action {
+        position: relative;
+        z-index: 1;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.65rem;
+        padding: 0.9rem 1.2rem;
+        color: var(--chalk-white);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        text-decoration: none;
+        text-transform: uppercase;
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        transition:
+            color 220ms ease,
+            background 220ms ease,
+            border-color 220ms ease,
+            transform 220ms ease;
+    }
+
+    .primary-action,
+    .featured-action {
+        background: var(--net-orange);
+        border-color: var(--net-orange);
+    }
+
+    .secondary-action {
+        background: var(--glass-white);
+    }
+
+    .primary-action:hover,
+    .featured-action:hover {
+        color: var(--court-black);
+        background: var(--hardwood-amber);
+        border-color: var(--hardwood-amber);
+        transform: translateY(-3px);
+    }
+
+    .secondary-action:hover {
+        color: var(--hardwood-amber);
+        background: var(--glass-strong);
+        border-color: var(--hardwood-amber);
+        transform: translateY(-3px);
+    }
+
+    .primary-action:focus-visible,
+    .secondary-action:focus-visible,
+    .featured-action:focus-visible,
+    .netflix-card-link:focus-visible,
+    .play-button:focus-visible {
+        outline: 2px solid var(--hardwood-amber);
+        outline-offset: 4px;
+    }
+
+    .metric-panel {
+        position: relative;
+        z-index: 1;
+        padding: 1.5rem;
+        overflow: hidden;
+        border-left: 2px solid var(--net-orange);
+    }
+
+    .metric-label {
+        display: block;
+        color: var(--hardwood-amber);
+    }
+
+    .metric-value {
+        display: block;
+        margin: 0.4rem 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(4rem, 8vw, 6rem);
+        font-weight: 400;
+        line-height: 1;
+    }
+
+    .metric-copy {
+        margin: 0;
+        color: var(--smoke-grey);
+        font-size: 0.82rem;
+        line-height: 1.6;
+    }
+
+    .featured-blog {
+        position: relative;
+        min-height: 470px;
+        margin-top: 1rem;
+        overflow: hidden;
+        background:
+            linear-gradient(90deg, rgba(11, 13, 16, 0.98) 0%, rgba(11, 13, 16, 0.82) 52%, rgba(11, 13, 16, 0.25) 100%),
+            radial-gradient(circle at 82% 48%, rgba(232, 163, 61, 0.23), transparent 28%),
+            repeating-linear-gradient(
+                45deg,
+                rgba(255, 255, 255, 0.025) 0,
+                rgba(255, 255, 255, 0.025) 1px,
+                transparent 1px,
+                transparent 13px
+            ),
+            var(--charcoal-panel);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    .featured-blog::before {
+        position: absolute;
+        top: 50%;
+        right: 7%;
+        width: 18rem;
+        height: 18rem;
+        content: "";
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        box-shadow:
+            inset 0 0 0 4rem rgba(255, 255, 255, 0.015),
+            0 0 0 4rem rgba(217, 98, 43, 0.025);
+        transform: translateY(-50%);
+    }
+
+    .featured-blog::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: linear-gradient(90deg, var(--net-orange), var(--hardwood-amber), transparent 75%);
+    }
+
+    .featured-content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        min-height: 470px;
+        max-width: 800px;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: center;
+        padding: clamp(2rem, 6vw, 5rem);
+    }
+
+    .featured-label {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.55rem;
+        margin-bottom: 1rem;
+        color: var(--hardwood-amber);
+    }
+
+    .featured-title {
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(2.75rem, 6vw, 5.2rem);
+        font-weight: 400;
+        line-height: 0.98;
+        letter-spacing: -0.03em;
+        text-transform: uppercase;
+    }
+
+    .featured-summary {
+        display: -webkit-box;
+        max-width: 680px;
+        margin: 1.25rem 0;
+        overflow: hidden;
+        color: var(--smoke-grey);
+        font-size: 0.96rem;
+        line-height: 1.75;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+    }
+
+    .featured-meta,
+    .blog-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.65rem 1rem;
+    }
+
+    .featured-meta {
+        margin-bottom: 1.5rem;
+    }
+
+    .meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--smoke-grey);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.68rem;
+        letter-spacing: 0.05em;
+    }
+
+    .meta-item i {
+        color: var(--hardwood-amber);
+    }
+
+    .library-section {
+        margin-top: 1rem;
+        padding: clamp(1.5rem, 4vw, 2.5rem);
+        background: rgba(255, 255, 255, 0.035);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+    }
+
+    .section-header {
+        margin-bottom: 1.75rem;
+        padding-bottom: 1.5rem;
+        border-bottom: 1px solid var(--glass-border);
+    }
+
+    .section-kicker {
+        margin: 0 0 0.65rem;
+        color: var(--hardwood-amber);
+    }
+
+    .section-title,
+    .empty-title {
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-weight: 400;
+        line-height: 1;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+    }
+
+    .section-title {
+        font-size: clamp(2rem, 4vw, 3.2rem);
+    }
+
+    .section-description,
+    .empty-copy {
+        max-width: 650px;
+        margin: 0.75rem 0 0;
+        color: var(--smoke-grey);
+        font-size: 0.9rem;
+        line-height: 1.7;
+    }
+
+    .article-count {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.7rem 0.85rem;
+        color: var(--hardwood-amber);
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+    }
+
+    .netflix-row-shell {
+        position: relative;
+    }
+
+    .netflix-row-shell::after {
+        position: absolute;
+        top: 0;
+        right: 0;
+        bottom: 0.8rem;
+        width: 4rem;
+        content: "";
+        background: linear-gradient(90deg, transparent, rgba(20, 22, 26, 0.96));
+        pointer-events: none;
+    }
+
+    .netflix-row {
+        display: grid;
+        grid-auto-columns: minmax(290px, 31%);
+        grid-auto-flow: column;
+        gap: 1rem;
+        padding: 0.1rem 3rem 1rem 0.1rem;
+        overflow-x: auto;
+        overscroll-behavior-inline: contain;
+        scroll-snap-type: inline mandatory;
+        scrollbar-color: var(--net-orange) rgba(255, 255, 255, 0.06);
+        scrollbar-width: thin;
+    }
+
+    .netflix-row::-webkit-scrollbar {
+        height: 7px;
+    }
+
+    .netflix-row::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.06);
+        border-radius: 999px;
+    }
+
+    .netflix-row::-webkit-scrollbar-thumb {
+        background: var(--net-orange);
+        border-radius: 999px;
+    }
+
+    .netflix-card {
+        position: relative;
+        min-height: 410px;
+        overflow: hidden;
+        scroll-snap-align: start;
+        background: var(--charcoal-panel);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        transition:
+            border-color 240ms ease,
+            box-shadow 240ms ease,
+            transform 240ms ease;
+    }
+
+    .card-background,
+    .card-pattern,
+    .card-glow,
+    .card-shade,
+    .netflix-card-link {
+        position: absolute;
+        inset: 0;
+    }
+
+    .card-background {
+        background:
+            linear-gradient(145deg, rgba(255, 255, 255, 0.08), transparent 36%),
+            var(--charcoal-panel);
+    }
+
+    .card-pattern {
+        background: repeating-linear-gradient(
+            45deg,
+            rgba(255, 255, 255, 0.022) 0,
+            rgba(255, 255, 255, 0.022) 1px,
+            transparent 1px,
+            transparent 12px
+        );
+    }
+
+    .card-glow {
+        top: auto;
+        right: -20%;
+        bottom: -30%;
+        left: auto;
+        width: 16rem;
+        height: 16rem;
+        background: radial-gradient(circle, rgba(217, 98, 43, 0.28), transparent 67%);
+        transition: transform 280ms ease;
+    }
+
+    .card-shade {
+        background: linear-gradient(180deg, rgba(11, 13, 16, 0.1), rgba(11, 13, 16, 0.92));
+    }
+
+    .netflix-card-link {
+        z-index: 2;
+        border-radius: inherit;
+    }
+
+    .netflix-card-content {
+        position: relative;
+        z-index: 3;
+        display: flex;
+        min-height: 410px;
+        flex-direction: column;
+        padding: 1.4rem;
+        pointer-events: none;
+    }
+
+    .card-top-row,
+    .card-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+    }
+
+    .article-number {
+        color: var(--hardwood-amber);
+    }
+
+    .published-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: var(--smoke-grey);
+    }
+
+    .published-badge i {
+        color: var(--hardwood-amber);
+        font-size: 0.38rem;
+    }
+
+    .card-main-content {
+        display: flex;
+        min-height: 0;
+        flex: 1;
+        flex-direction: column;
+        justify-content: flex-end;
+        padding-top: 3rem;
+    }
+
+    .category-badge {
+        display: inline-flex;
+        width: fit-content;
+        align-items: center;
+        gap: 0.4rem;
+        margin-bottom: 0.8rem;
+        padding: 0.45rem 0.6rem;
+        color: var(--hardwood-amber);
+        background: rgba(232, 163, 61, 0.08);
+        border: 1px solid rgba(232, 163, 61, 0.18);
+        border-radius: 999px;
+    }
+
+    .blog-title {
+        display: -webkit-box;
+        margin: 0;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(1.8rem, 3vw, 2.4rem);
+        font-weight: 400;
+        line-height: 1.04;
+        letter-spacing: -0.02em;
+        text-transform: uppercase;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+    }
+
+    .blog-summary {
+        display: -webkit-box;
+        margin: 0.9rem 0 1.25rem;
+        overflow: hidden;
+        color: var(--smoke-grey);
+        font-size: 0.82rem;
+        line-height: 1.65;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 3;
+    }
+
+    .card-footer {
+        padding-top: 1rem;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .play-button {
+        display: grid;
+        width: 2.75rem;
+        height: 2.75rem;
+        flex: 0 0 2.75rem;
+        place-items: center;
+        color: var(--chalk-white);
+        font-size: 1rem;
+        text-decoration: none;
+        background: var(--net-orange);
+        border: 1px solid var(--net-orange);
+        border-radius: 50%;
+        pointer-events: auto;
+        transition:
+            color 220ms ease,
+            background 220ms ease,
+            transform 220ms ease;
+    }
+
+    .netflix-card:hover,
+    .netflix-card:focus-within {
+        border-color: rgba(232, 163, 61, 0.42);
+        box-shadow: 0 18px 40px rgba(0, 0, 0, 0.42);
+        transform: translateY(-5px);
+    }
+
+    .netflix-card:hover .card-glow,
+    .netflix-card:focus-within .card-glow {
+        transform: scale(1.18);
+    }
+
+    .netflix-card:hover .play-button,
+    .netflix-card:focus-within .play-button {
+        color: var(--court-black);
+        background: var(--hardwood-amber);
+        transform: scale(1.06);
+    }
+
+    .empty-library {
+        margin-top: 1rem;
+        padding: clamp(2.5rem, 7vw, 5.5rem);
+        text-align: center;
+    }
+
+    .empty-icon {
+        display: grid;
+        width: 4.5rem;
+        height: 4.5rem;
+        margin: 0 auto 1.25rem;
+        place-items: center;
+        color: var(--hardwood-amber);
+        font-size: 1.6rem;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+    }
+
+    .empty-title {
+        font-size: clamp(2.3rem, 5vw, 4rem);
+    }
+
+    .empty-copy {
+        margin-right: auto;
+        margin-bottom: 1.5rem;
+        margin-left: auto;
+    }
+
+    .reveal,
+    .reveal-delay {
+        animation: libraryFadeUp 550ms ease-out both;
+    }
+
+    .reveal-delay {
+        animation-delay: 90ms;
+    }
+
+    @keyframes libraryFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 991.98px) {
+        .metric-panel {
+            max-width: 360px;
+        }
+
+        .netflix-row {
+            grid-auto-columns: minmax(290px, 47%);
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .library-shell {
+            padding-top: 2rem;
+        }
+
+        .library-hero,
+        .library-section {
+            padding: 1.5rem;
+        }
+
+        .featured-blog,
+        .featured-content {
+            min-height: 430px;
+        }
+
+        .featured-blog::before {
+            right: -10rem;
+        }
+
+        .netflix-row {
+            grid-auto-columns: minmax(280px, 88%);
+        }
+
+        .netflix-row-shell::after {
+            width: 2.5rem;
+        }
+    }
+
+    @media (max-width: 575.98px) {
+        .primary-action,
+        .secondary-action {
+            width: 100%;
+        }
+
+        .card-footer {
+            align-items: flex-end;
+        }
+
+        .blog-meta {
+            display: grid;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .blog-library *,
+        .blog-library *::before,
+        .blog-library *::after {
+            animation-duration: 1ms !important;
+            animation-delay: 0ms !important;
+            scroll-behavior: auto !important;
+            transition-duration: 1ms !important;
+        }
+
+        .netflix-card:hover,
+        .netflix-card:focus-within,
+        .primary-action:hover,
+        .secondary-action:hover,
+        .featured-action:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<main class="blog-library">
+    <div class="library-shell">
+        <header class="chrome-panel library-hero reveal">
+            <div class="row align-items-center g-4 g-lg-5">
+                <div class="col-lg-8">
+                    <p class="page-kicker">
+                        <i class="bi bi-collection-play" aria-hidden="true"></i>
+                        Basketball Knowledge Library
+                    </p>
+
+                    <h1 class="page-title">
+                        Choose what you want to
+                        <span class="metallic-text">understand next.</span>
+                    </h1>
+
+                    <p class="page-description">
+                        Browse complete basketball investigations built from focused
+                        topics, defining questions, systematic reasoning, and
+                        development-centered lessons.
+                    </p>
+
+                    {% if admin %}
+                        <div class="d-flex flex-column flex-sm-row flex-wrap gap-2 gap-sm-3">
+                            <a href="{% url 'adminblog:create_topic' %}" class="primary-action">
+                                <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                                Start New Investigation
+                            </a>
+
+                            <a href="{% url 'adminblog:home' %}" class="secondary-action">
+                                <i class="bi bi-grid" aria-hidden="true"></i>
+                                Return to Dashboard
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <div class="col-lg-4">
+                    <div class="chrome-panel metric-panel">
+                        <span class="metric-label">Available Lessons</span>
+                        <strong class="metric-value">{{ blogs|length }}</strong>
+                        <p class="metric-copy">
+                            Published basketball article{{ blogs|length|pluralize }}
+                            ready to study, challenge, and apply.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        {% if blogs %}
+            {% for blog in blogs %}
+                {% if forloop.first %}
+                    <section class="featured-blog reveal-delay" aria-labelledby="featured-blog-title">
+                        <div class="featured-content">
+                            <span class="featured-label">
+                                <i class="bi bi-stars" aria-hidden="true"></i>
+                                Featured Investigation
+                            </span>
+
+                            <h2 class="featured-title" id="featured-blog-title">
+                                {{ blog.name }}
+                            </h2>
+
+                            <p class="featured-summary">
+                                {{ blog.summary }}
+                            </p>
+
+                            <div class="featured-meta">
+                                {% if blog.category %}
+                                    <span class="meta-item">
+                                        <i class="bi bi-tag" aria-hidden="true"></i>
+                                        {{ blog.category }}
+                                    </span>
+                                {% endif %}
+
+                                {% if blog.author %}
+                                    <span class="meta-item">
+                                        <i class="bi bi-person" aria-hidden="true"></i>
+                                        {{ blog.author }}
+                                    </span>
+                                {% endif %}
+
+                                {% if blog.date %}
+                                    <span class="meta-item">
+                                        <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                        {{ blog.date|date:"F j, Y" }}
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <a href="{% url 'adminblog:blog_detail' blog.id %}" class="featured-action">
+                                <i class="bi bi-play-fill" aria-hidden="true"></i>
+                                Read Featured Article
+                            </a>
+                        </div>
+                    </section>
+                {% endif %}
+            {% endfor %}
+
+            <section class="library-section reveal-delay" aria-labelledby="library-section-title">
+                <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-end gap-3 section-header">
+                    <div>
+                        <p class="section-kicker">Continue Exploring</p>
+                        <h2 class="section-title" id="library-section-title">
+                            Basketball Investigations
+                        </h2>
+                        <p class="section-description">
+                            Scroll through the library and select the lesson that
+                            matches what you want to understand about the game.
+                        </p>
+                    </div>
+
+                    <span class="article-count">
+                        <i class="bi bi-collection" aria-hidden="true"></i>
+                        {{ blogs|length }} article{{ blogs|length|pluralize }}
+                    </span>
+                </div>
+
+                <div class="netflix-row-shell">
+                    <div class="netflix-row" aria-label="Basketball article library">
+                        {% for blog in blogs %}
+                            <article class="netflix-card">
+                                <div class="card-background" aria-hidden="true"></div>
+                                <div class="card-pattern" aria-hidden="true"></div>
+                                <div class="card-glow" aria-hidden="true"></div>
+                                <div class="card-shade" aria-hidden="true"></div>
+
+                                <a
+                                    href="{% url 'adminblog:blog_detail' blog.id %}"
+                                    class="netflix-card-link"
+                                    aria-label="Read {{ blog.name }}"
+                                ></a>
+
+                                <div class="netflix-card-content">
+                                    <div class="card-top-row">
+                                        <span class="article-number">
+                                            <i class="bi bi-record-circle" aria-hidden="true"></i>
+                                            Article {{ forloop.counter|stringformat:"02d" }}
+                                        </span>
+
+                                        <span class="published-badge">
+                                            <i class="bi bi-circle-fill" aria-hidden="true"></i>
+                                            Published
+                                        </span>
+                                    </div>
+
+                                    <div class="card-main-content">
+                                        {% if blog.category %}
+                                            <span class="category-badge">
+                                                <i class="bi bi-tag" aria-hidden="true"></i>
+                                                {{ blog.category }}
+                                            </span>
+                                        {% endif %}
+
+                                        <h3 class="blog-title">{{ blog.name }}</h3>
+                                        <p class="blog-summary">{{ blog.summary }}</p>
+
+                                        <div class="card-footer">
+                                            <div class="blog-meta">
+                                                {% if blog.author %}
+                                                    <span class="meta-item">
+                                                        <i class="bi bi-person" aria-hidden="true"></i>
+                                                        {{ blog.author }}
+                                                    </span>
+                                                {% endif %}
+
+                                                {% if blog.date %}
+                                                    <span class="meta-item">
+                                                        <i class="bi bi-calendar3" aria-hidden="true"></i>
+                                                        {{ blog.date|date:"M j, Y" }}
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+
+                                            <a
+                                                href="{% url 'adminblog:blog_detail' blog.id %}"
+                                                class="play-button"
+                                                aria-label="Open {{ blog.name }}"
+                                            >
+                                                <i class="bi bi-play-fill" aria-hidden="true"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </article>
+                        {% endfor %}
+                    </div>
+                </div>
+            </section>
+        {% else %}
+            <section class="chrome-panel empty-library reveal-delay">
+                <div class="empty-icon" aria-hidden="true">
+                    <i class="bi bi-collection-play"></i>
+                </div>
+
+                <p class="section-kicker mb-2">Library Awaiting Publication</p>
+                <h2 class="empty-title">No blogs have been generated yet.</h2>
+                <p class="empty-copy">
+                    Create a lesson, choose a focused topic, answer the defining
+                    questions, and generate your first basketball article.
+                </p>
+
+                {% if admin %}
+                    <a href="{% url 'adminblog:create_topic' %}" class="primary-action">
+                        <i class="bi bi-plus-circle" aria-hidden="true"></i>
+                        Create Your First Blog
+                    </a>
+                {% endif %}
+            </section>
+        {% endif %}
+    </div>
+</main>
+{% endblock %}

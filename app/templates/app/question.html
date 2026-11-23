@@ -1,0 +1,424 @@
+{% extends 'app/base.html' %}
+
+{% block title %}Answer the Question | Basketball Explained{% endblock %}
+
+{% block content %}
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap');
+
+    .question-page {
+        --court-black: #0B0D10;
+        --charcoal-panel: #15181D;
+        --glass-white: rgba(255, 255, 255, 0.06);
+        --glass-border: rgba(255, 255, 255, 0.12);
+        --net-orange: #D9622B;
+        --hardwood-amber: #E8A33D;
+        --chalk-white: #F4F2EC;
+        --smoke-grey: #8B9096;
+
+        min-height: 100vh;
+        margin-inline: calc(50% - 50vw);
+        padding: 4rem 1rem 6rem;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "Inter", sans-serif;
+        background:
+            radial-gradient(
+                circle at 82% 18%,
+                rgba(217, 98, 43, 0.18),
+                transparent 25%
+            ),
+            radial-gradient(
+                circle at 12% 82%,
+                rgba(232, 163, 61, 0.10),
+                transparent 28%
+            ),
+            repeating-linear-gradient(
+                90deg,
+                transparent 0,
+                transparent 9.95%,
+                rgba(255, 255, 255, 0.025) 10%
+            ),
+            var(--court-black);
+    }
+
+    .question-page *,
+    .question-page *::before,
+    .question-page *::after {
+        box-sizing: border-box;
+    }
+
+    .question-shell {
+        width: min(100%, 900px);
+        margin: 0 auto;
+    }
+
+    .question-progress {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        margin-bottom: 2rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        animation: questionFadeUp 550ms ease-out both;
+    }
+
+    .question-progress::before {
+        width: 2.5rem;
+        height: 2px;
+        content: "";
+        background: var(--net-orange);
+    }
+
+    .question-panel {
+        position: relative;
+        padding: clamp(2rem, 6vw, 4.5rem);
+        overflow: hidden;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        backdrop-filter: blur(16px);
+        -webkit-backdrop-filter: blur(16px);
+        animation: questionFadeUp 600ms 80ms ease-out both;
+    }
+
+    .question-panel::before {
+        position: absolute;
+        top: -9rem;
+        right: -9rem;
+        width: 22rem;
+        height: 22rem;
+        content: "";
+        border: 1px solid var(--glass-border);
+        border-radius: 50%;
+        box-shadow:
+            0 0 0 2.5rem rgba(255, 255, 255, 0.02),
+            0 0 0 6rem rgba(255, 255, 255, 0.015);
+        pointer-events: none;
+    }
+
+    .question-panel__number {
+        position: relative;
+        display: block;
+        margin-bottom: 1.5rem;
+        color: var(--net-orange);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(4rem, 10vw, 7rem);
+        line-height: 0.8;
+        letter-spacing: -0.05em;
+    }
+
+    .question-panel__label {
+        position: relative;
+        margin: 0 0 0.75rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+    }
+
+    .question-panel__title {
+        position: relative;
+        max-width: 720px;
+        margin: 0;
+        color: var(--chalk-white);
+        font-family: "Anton", sans-serif;
+        font-size: clamp(2.5rem, 6vw, 4.8rem);
+        font-weight: 400;
+        line-height: 0.98;
+        letter-spacing: -0.03em;
+        text-transform: uppercase;
+    }
+
+    .question-panel__title span {
+        color: var(--net-orange);
+    }
+
+    .question-panel__description {
+        position: relative;
+        max-width: 650px;
+        margin: 1.4rem 0 2.5rem;
+        color: var(--smoke-grey);
+        font-size: 1rem;
+        line-height: 1.7;
+    }
+
+    .question-form {
+        position: relative;
+        padding-top: 2rem;
+        border-top: 1px solid var(--glass-border);
+    }
+
+    .question-form p {
+        margin-bottom: 1.5rem;
+    }
+
+    .question-form label {
+        display: block;
+        margin-bottom: 0.65rem;
+        color: var(--chalk-white);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+    }
+
+    .question-form input:not([type="radio"]):not([type="checkbox"]),
+    .question-form select,
+    .question-form textarea {
+        display: block;
+        width: 100%;
+        padding: 1rem 1.1rem;
+        color: var(--chalk-white);
+        font-family: "Inter", sans-serif;
+        font-size: 1rem;
+        background: var(--charcoal-panel);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        outline: none;
+        transition:
+            border-color 200ms ease,
+            box-shadow 200ms ease,
+            transform 200ms ease;
+    }
+
+    .question-form textarea {
+        min-height: 170px;
+        line-height: 1.65;
+        resize: vertical;
+    }
+
+    .question-form select {
+        color-scheme: dark;
+        cursor: pointer;
+    }
+
+    .question-form input:focus,
+    .question-form select:focus,
+    .question-form textarea:focus {
+        border-color: var(--hardwood-amber);
+        box-shadow: 0 0 0 3px rgba(232, 163, 61, 0.10);
+        transform: translateY(-1px);
+    }
+
+    .question-form input[type="radio"],
+    .question-form input[type="checkbox"] {
+        width: 1.05rem;
+        height: 1.05rem;
+        accent-color: var(--net-orange);
+    }
+
+    .question-form ul:not(.errorlist) {
+        display: grid;
+        gap: 0.75rem;
+        padding: 0;
+        margin: 0;
+        list-style: none;
+    }
+
+    .question-form ul:not(.errorlist) label {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin: 0;
+        padding: 1rem;
+        cursor: pointer;
+        background: var(--glass-white);
+        border: 1px solid var(--glass-border);
+        border-radius: 14px;
+        transition:
+            background 200ms ease,
+            border-color 200ms ease,
+            transform 200ms ease;
+    }
+
+    .question-form ul:not(.errorlist) label:hover {
+        background: rgba(255, 255, 255, 0.12);
+        border-color: var(--hardwood-amber);
+        transform: translateY(-2px);
+    }
+
+    .question-form .helptext {
+        display: block;
+        margin-top: 0.6rem;
+        color: var(--smoke-grey);
+        font-size: 0.78rem;
+        line-height: 1.5;
+    }
+
+    .question-form .errorlist {
+        padding: 0;
+        margin: 0 0 0.75rem;
+        color: var(--hardwood-amber);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.72rem;
+        list-style: none;
+    }
+
+    .question-submit {
+        position: relative;
+        display: inline-flex;
+        width: 100%;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        margin-top: 0.5rem;
+        padding: 1rem 1.25rem;
+        overflow: hidden;
+        color: var(--chalk-white);
+        font-family: "JetBrains Mono", monospace;
+        font-size: 0.75rem;
+        font-weight: 600;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+        background: var(--net-orange);
+        border: 1px solid var(--net-orange);
+        border-radius: 14px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.35);
+        transition:
+            color 250ms ease,
+            background 250ms ease,
+            transform 250ms ease;
+    }
+
+    .question-submit::after {
+        position: absolute;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        height: 2px;
+        content: "";
+        background: var(--hardwood-amber);
+        transform: scaleX(0);
+        transform-origin: left;
+        transition: transform 300ms ease;
+    }
+
+    .question-submit:hover {
+        color: var(--court-black);
+        background: var(--hardwood-amber);
+        transform: translateY(-4px);
+    }
+
+    .question-submit:hover::after,
+    .question-submit:focus-visible::after {
+        transform: scaleX(1);
+    }
+
+    .question-submit:focus-visible {
+        outline: 2px solid var(--hardwood-amber);
+        outline-offset: 4px;
+    }
+
+    .question-submit__arrow {
+        font-size: 1.15rem;
+        transition: transform 250ms ease;
+    }
+
+    .question-submit:hover .question-submit__arrow {
+        transform: translateX(5px);
+    }
+
+    @keyframes questionFadeUp {
+        from {
+            opacity: 0;
+            transform: translateY(12px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    @media (max-width: 767.98px) {
+        .question-page {
+            padding-top: 2.5rem;
+        }
+
+        .question-panel {
+            padding: 2rem 1.25rem;
+        }
+
+        .question-panel__number {
+            margin-bottom: 1.25rem;
+        }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .question-page *,
+        .question-page *::before,
+        .question-page *::after {
+            animation-duration: 1ms !important;
+            animation-delay: 0ms !important;
+            transition-duration: 200ms !important;
+        }
+
+        .question-submit:hover,
+        .question-form ul:not(.errorlist) label:hover {
+            transform: none;
+        }
+    }
+</style>
+
+<main class="question-page">
+    <div class="question-shell">
+        <div class="question-progress">
+            Interactive Breakdown · Your Perspective
+        </div>
+
+        <section
+            class="question-panel"
+            aria-labelledby="question-heading"
+        >
+            <span class="question-panel__number" aria-hidden="true">
+                Q
+            </span>
+
+            <p class="question-panel__label">
+                Read the floor
+            </p>
+
+            <h1 id="question-heading" class="question-panel__title">
+                {{ question|default:"AI question to the user goes here" }}
+            </h1>
+
+            <p class="question-panel__description">
+                Think beyond the immediate result. Use what you have seen,
+                experienced, and understood about the game to explain your
+                perspective clearly.
+            </p>
+
+            <form 
+            method="post" 
+            class="question-form"
+            data-processing-form
+            data-processing-title="Building your personalized blog"
+            data-processing-message="Searching and combining relevant basketball facts to create a complete basketball lesson.">
+
+                {% csrf_token %}
+                {{ form.as_p }}
+
+                <button type="submit" class="question-submit">
+                    <span>Submit answer</span>
+
+                    <span
+                        class="question-submit__arrow"
+                        aria-hidden="true"
+                    >
+                        →
+                    </span>
+                </button>
+            </form>
+        </section>
+    </div>
+</main>
+{% endblock %}
