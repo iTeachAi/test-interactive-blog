@@ -10,6 +10,7 @@ from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 
+from .audiences import audience_slugs
 from .forms import BlogPostForm
 from .lessons import lesson_fields, normalize_lesson
 from .models import BlogPost
@@ -120,6 +121,7 @@ def process_blog_post(body, *, submission_type):
         try:
             data = normalize_lesson(data)
             fields = lesson_fields(data)
+            fields['category'] = data.get('category', data['classification'].get('category', fields['category']))
         except ValueError as error:
             raise BlogWebhookError(str(error)) from error
         if data.get('schema_version') != '1.0':
@@ -137,6 +139,16 @@ def process_blog_post(body, *, submission_type):
         invalid_fields = ', '.join(post_form.errors)
         raise BlogWebhookError(f'The webhook returned invalid fields ({invalid_fields}).')
 
+    result = dict(post_form.cleaned_data)
+    audiences = audience_slugs(data) or audience_slugs({'audience': result['category']})
+    if audiences:
+        result['audiences'] = audiences
     if structured:
-        return {**post_form.cleaned_data, 'status': status, 'lesson': data}
-    return post_form.cleaned_data
+        result.update(status=status, lesson=data)
+        topics = [
+            topic.get('label') or topic.get('key')
+            for topic in data.get('topic_mentions', []) if isinstance(topic, dict)
+        ]
+        labels = [topic for topic in topics if isinstance(topic, str) and topic != result['category']]
+        result['topics'] = ', '.join(dict.fromkeys(labels))[:500]
+    return result

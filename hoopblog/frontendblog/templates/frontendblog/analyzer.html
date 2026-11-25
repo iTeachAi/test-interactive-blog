@@ -1,0 +1,31 @@
+{% extends 'frontendblog/base.html' %}
+{% block title %}Stat Sheet Analyzer | Basketball Explained{% endblock %}
+{% block content %}
+<main class="container post" id="main">
+  <h1>{% if results %}Discuss your stat sheet{% else %}Stat Sheet Analyzer{% endif %}</h1>
+  {% if form %}
+    <p>Upload a game or team CSV with stats such as points, assists, or turnovers. The CSV export from the image tool also works when it includes those stats or complete two- and three-point shooting columns.</p>
+    <form class="request-form" method="post" enctype="multipart/form-data">
+      {% csrf_token %}
+      {{ form.as_p }}
+      {% if form.sends_csv %}<p class="meta">Your CSV is sent to the analysis service.</p>{% endif %}
+      <button class="button">Analyze Stat Sheet</button>
+    </form>
+      {% include 'frontendblog/stat_sheet_focus.html' %}
+    {% if analyzer_url %}
+      <p class="actions">Have a PNG or JPEG instead? <a href="{{ analyzer_url }}">Open the stat sheet image tool</a></p>
+    {% else %}
+      <p class="actions meta">Image uploads are currently unavailable. You can still analyze a CSV here.</p>
+    {% endif %}
+  {% endif %}
+  {% if players %}
+    {% include 'frontendblog/stat_results.html' %}
+  {% endif %}
+  {% if players or results %}
+    <aside class="callout">
+      <h2>Want help turning these numbers into a development plan?</h2>
+      <a class="button" href="{% url 'consultation' %}">Book a Free First Consultation</a>
+    </aside>
+  {% endif %}
+</main>
+{% endblock %}

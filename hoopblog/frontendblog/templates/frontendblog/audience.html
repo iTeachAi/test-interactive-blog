@@ -1,0 +1,21 @@
+{% extends 'frontendblog/base.html' %}
+{% block title %}{{ audience }} Blog | Basketball Explained{% endblock %}
+{% block content %}
+<main class="container" id="main">
+  <h1 class="page-title">{{ audience }} Blog</h1>
+  <div class="cards">
+    {% for post in posts %}
+      <article>
+        {% if post.image_url %}<img src="{{ post.image_url }}" alt="{{ post.image_alt }}" loading="lazy">{% endif %}
+        <div class="card-body">
+          <p class="meta">{{ post.category }}{% if post.topics %} · {{ post.topics }}{% endif %}</p>
+          <h2><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></h2>
+          {% firstof post.summary post.body|truncatewords:32 as excerpt %}<p>{{ excerpt }}</p>
+        </div>
+      </article>
+    {% empty %}
+      <p class="empty">There are no published articles for this audience yet. <a href="{% url 'blog-archive' %}">Browse all articles</a>.</p>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

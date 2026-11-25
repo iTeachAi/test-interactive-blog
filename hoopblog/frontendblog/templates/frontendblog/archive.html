@@ -1,0 +1,151 @@
+{% extends "frontendblog/base.html" %}
+
+{% block head %}
+  <style>
+    .browse-width { width: min(92%, 88rem); margin-inline: auto; }
+    .browse-header { background: #101113; }
+    .browse-header-inner {
+      min-height: 4rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+    }
+    .wordmark { font-weight: 900; letter-spacing: -.035em; text-decoration: none; }
+    .feature {
+      position: relative;
+      isolation: isolate;
+      background: radial-gradient(ellipse at top right, #633925, #16171b 65%);
+      overflow: hidden;
+    }
+    .feature img, .feature::after {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: -1;
+    }
+    .feature img { object-fit: cover; object-position: center; }
+    .feature::after {
+      content: "";
+      background: linear-gradient(0deg, var(--background), transparent 70%),
+        linear-gradient(90deg, #101113 0%, rgba(16, 17, 19, .86) 32%, rgba(16, 17, 19, .22) 100%);
+    }
+    .feature-inner { padding-block: clamp(3rem, 9vw, 8rem) clamp(3rem, 6vw, 6rem); }
+    .feature h1 { max-width: 18ch; font-size: clamp(2.5rem, 6vw, 5.25rem); overflow-wrap: anywhere; }
+    .feature-category { color: var(--accent); font-weight: 750; margin-bottom: .65rem; }
+    .feature-summary { max-width: 48ch; margin-top: 1rem; }
+    .read-post {
+      display: inline-block;
+      margin-top: 1.4rem;
+      padding: .65rem 1.15rem;
+      border-radius: .4rem;
+      background: var(--accent);
+      color: #16110e;
+      font-weight: 750;
+      text-decoration: none;
+    }
+    .read-post:hover { background: #ffb989; }
+    .browse-library { padding-top: 1rem; }
+    .category-filter { display: flex; flex-wrap: wrap; gap: .55rem; margin-bottom: 2rem; }
+    .category-filter a {
+      padding: .35rem .85rem;
+      border: 1px solid var(--border);
+      border-radius: 2rem;
+      color: var(--text);
+      text-decoration: none;
+      overflow-wrap: anywhere;
+    }
+    .category-filter a:hover { border-color: var(--accent); }
+    .category-filter [aria-current="page"] {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #16110e;
+      font-weight: 750;
+    }
+    .post-shelf {
+      display: grid;
+      grid-auto-flow: column;
+      grid-auto-columns: clamp(15rem, 29vw, 22rem);
+      gap: .9rem;
+      overflow-x: auto;
+      padding: .4rem .4rem .85rem;
+      margin-inline: -.4rem;
+      scroll-snap-type: x proximity;
+      scroll-padding-inline: .4rem;
+    }
+    .post-shelf.filtered {
+      grid-auto-flow: row;
+      grid-template-columns: repeat(auto-fill, minmax(min(100%, 16rem), 1fr));
+    }
+    .shelf-card { scroll-snap-align: start; }
+    .shelf-card:hover, .shelf-card:focus-within { border-color: var(--accent); }
+    .shelf-card a { display: block; height: 100%; color: inherit; text-decoration: none; }
+    .shelf-card a:focus-visible { outline-offset: -3px; }
+    .shelf-card a:hover h3 { color: var(--accent); }
+    .shelf-image { aspect-ratio: 16 / 9; background: radial-gradient(ellipse at top right, #78472f, #27252a 70%); }
+    .shelf-card .card-body { padding: .85rem 1rem 1rem; }
+    .shelf-card h3 { line-height: 1.25; }
+    .shelf-summary { color: var(--muted); font-size: .9rem; }
+  </style>
+{% endblock %}
+
+{% block content %}
+
+
+  <div class="feature">
+    {% if featured.image_url %}
+      <img src="{{ featured.image_url }}" alt="{{ featured.image_alt }}" fetchpriority="high">
+    {% endif %}
+    <div class="browse-width feature-inner">
+      {% if featured %}
+        <p class="feature-category">{{ featured.category }}</p>
+        <h1>{{ featured.title }}</h1>
+        <p class="feature-summary">{{ featured.summary|truncatewords:36 }}</p>
+        <a class="read-post" href="{{ featured.url }}">Read post</a>
+      {% else %}
+        <h1>Basketball lessons</h1>
+      {% endif %}
+    </div>
+  </div>
+
+  <main id="main" class="browse-width browse-library">
+    {% if categories %}
+      <nav class="category-filter" aria-label="Filter posts by category">
+        <a href="{% url 'blog-archive' %}"{% if not selected_category %} aria-current="page"{% endif %}>All categories</a>
+        {% for category in categories %}
+          <a href="{% url 'blog-archive' %}?category={{ category|urlencode:"" }}"{% if category == selected_category %} aria-current="page"{% endif %}>{{ category }}</a>
+        {% endfor %}
+      </nav>
+    {% endif %}
+
+    {% for section in sections %}
+      <section aria-labelledby="category-{{ forloop.counter }}">
+        <h2 id="category-{{ forloop.counter }}">{{ section.title }}</h2>
+        <div class="post-shelf{% if selected_category %} filtered{% endif %}">
+          {% for entry in section.entries %}
+            <article class="shelf-card">
+              <a href="{{ entry.url }}">
+                <div class="shelf-image">
+                  {% if entry.image_url %}
+                    <img src="{{ entry.image_url }}" alt="{{ entry.image_alt }}" loading="lazy">
+                  {% endif %}
+                </div>
+                <div class="card-body">
+                  <h3>{{ entry.title }}</h3>
+                  <p class="meta">
+                    <time datetime="{{ entry.date|date:'Y-m-d' }}">{{ entry.date|date:'M j, Y' }}</time>
+                    {% if entry.author %} · {{ entry.author }}{% endif %}
+                  </p>
+                  {% if entry.summary %}<p class="shelf-summary">{{ entry.summary|truncatewords:20 }}</p>{% endif %}
+                </div>
+              </a>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% empty %}
+      <p class="empty">No posts have been published yet.</p>
+    {% endfor %}
+  </main>
+{% endblock %}

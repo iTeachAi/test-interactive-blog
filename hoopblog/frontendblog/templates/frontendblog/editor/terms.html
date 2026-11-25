@@ -1,0 +1,29 @@
+{% extends "frontendblog/editor/base.html" %}
+
+{% block title %}Court Lingo | Editor{% endblock %}
+
+{% block editor_content %}
+  <div class="editor-heading">
+    <h1>Court Lingo</h1>
+    {% if perms.backend.add_courtterm %}
+      <a class="button" href="{% url 'editor-term-create' %}">Add a term</a>
+    {% endif %}
+  </div>
+  {% if terms %}
+    <ul class="editor-list">
+      {% for term in terms %}
+        <li>
+          <div>
+            <h2><a href="{% url 'court-term' term.slug %}">{{ term.name }}</a></h2>
+            <p class="meta">{{ term.meaning|truncatewords:24 }}</p>
+          </div>
+          {% if perms.backend.change_courtterm %}
+            <a href="{% url 'editor-term-update' term.pk %}" aria-label="Edit {{ term.name }}">Edit</a>
+          {% endif %}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <p class="empty">No terms have been added yet.</p>
+  {% endif %}
+{% endblock %}

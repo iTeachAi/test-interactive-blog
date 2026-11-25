@@ -1,12 +1,12 @@
 {% extends "frontendblog/editor/base.html" %}
 
-{% block title %}Manage posts | Hoop City Lessons{% endblock %}
+{% block title %}Blog Database | Basketball Explained{% endblock %}
 
 {% block editor_content %}
   <div class="editor-heading">
-    <h1>Manage posts</h1>
+    <h1>Blog Database</h1>
     {% if perms.backend.add_blogpost %}
-      <a class="button" href="{% url 'blog-create' %}">New post</a>
+      <a class="button" href="{% url 'blog-create' %}">Write a Blog</a>
     {% endif %}
   </div>
 
@@ -17,6 +17,7 @@
           <div>
             <h2 style="font-size: 1.125rem; margin: 0;">{{ post.title }}</h2>
             <p class="meta">{{ post.category }} · {{ post.date|date:"M j, Y" }} · {{ post.get_status_display }}</p>
+            <p class="meta">{% for audience in post.audiences.all %}{{ audience }}{% if not forloop.last %}, {% endif %}{% empty %}No audience assigned{% endfor %}</p>
           </div>
           <div class="editor-actions">
             <a href="{{ post.get_absolute_url }}" aria-label="View {{ post.title }}">{% if post.status == 'published' %}View{% else %}Preview{% endif %}</a>

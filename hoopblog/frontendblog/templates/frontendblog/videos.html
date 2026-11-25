@@ -1,0 +1,41 @@
+{% extends 'frontendblog/base.html' %}
+{% block title %}Video Lessons | Basketball Explained{% endblock %}
+{% block content %}
+<main class="container" id="main">
+  <h1 class="page-title">Video Lessons</h1>
+  {% if topics %}
+  <form method="get" class="filters">
+    <div><label for="topic">Topic</label><select id="topic" name="topic">
+      <option value="">All topics</option>
+      {% for topic in topics %}<option{% if topic == selected_topic %} selected{% endif %}>{{ topic }}</option>{% endfor %}
+    </select></div>
+    <div><label for="audience">Audience</label><select id="audience" name="audience">
+      <option value="">All audiences</option>
+      {% for value, label in audiences %}<option value="{{ value }}"{% if value == selected_role %} selected{% endif %}>{{ label }}</option>{% endfor %}
+    </select></div>
+    <button class="button">Filter lessons</button>
+  </form>
+  {% endif %}
+  <div class="cards">
+    {% for lesson in lessons %}
+      <article class="card-body">
+        <p class="meta">{{ lesson.topic }}</p>
+        <h2><a href="{{ lesson.source_url }}">{{ lesson.title }}</a></h2>
+        <p>{{ lesson.objective }}</p>
+        {% if lesson.articles.all or lesson.terms.all %}
+          <ul>
+            {% for post in lesson.articles.all %}<li><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></li>{% endfor %}
+            {% for term in lesson.terms.all %}<li><a href="{% url 'court-term' term.slug %}">{{ term.name }}</a></li>{% endfor %}
+          </ul>
+        {% endif %}
+      </article>
+    {% empty %}
+      {% if topics %}
+        <p class="empty">No video lessons match these filters. <a href="{% url 'video-lessons' %}">Clear filters</a>.</p>
+      {% else %}
+        <p class="empty">Video lessons aren’t available yet. <a href="{% url 'blog-archive' %}">Browse written lessons</a>.</p>
+      {% endif %}
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

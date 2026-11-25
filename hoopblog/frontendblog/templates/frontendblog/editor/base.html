@@ -2,7 +2,8 @@
 
 {% block head %}
   <style>
-    .editor-header { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; padding-block: 1rem; }
+    .editor-header { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1.5rem; padding-block: 1rem; }
+    .editor-header [aria-current="page"] { color: var(--text); text-decoration: none; font-weight: 750; }
     .editor h1 { max-width: none; font-size: clamp(2.25rem, 6vw, 4rem); }
     .editor-heading { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 1.5rem; }
     .editor-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem 1rem; }
@@ -38,6 +39,8 @@
       color: var(--text);
       font: inherit;
     }
+    .editor-form .pdf-clear { display: inline; width: auto; }
+    .editor-form .pdf-clear + label { display: inline; }
     .editor-form textarea { resize: vertical; }
     .editor-form textarea[name="summary"] { height: 6rem; }
     .editor-form .helptext { color: var(--muted); font-size: .875rem; }
@@ -48,12 +51,20 @@
 
 {% block content %}
   <header class="masthead">
-    <nav class="container editor-header" aria-label="Post management">
-      <a href="{% url 'home' %}">Hoop City Lessons</a>
-      <a href="{% url 'blog-editor' %}">Manage posts</a>
+    <nav class="container editor-header" aria-label="Editor">
+      {% if perms.backend.add_blogpost or perms.backend.change_blogpost or perms.backend.delete_blogpost %}
+        <a href="{% url 'blog-editor' %}"{% if request.resolver_match.url_name == 'blog-editor' %} aria-current="page"{% endif %}>Blog Database</a>
+      {% endif %}
+      {% if perms.backend.add_blogpost %}
+        <a href="{% url 'blog-create' %}"{% if request.resolver_match.url_name == 'blog-create' %} aria-current="page"{% endif %}>Write a Blog</a>
+      {% endif %}
+      <a href="{% url 'editor-stat-sheet' %}"{% if request.resolver_match.url_name == 'editor-stat-sheet' %} aria-current="page"{% endif %}>Stat Sheet Analyzer</a>
+      {% if perms.backend.add_courtterm or perms.backend.change_courtterm or perms.backend.view_courtterm %}
+        <a href="{% url 'editor-court-lingo' %}"{% if request.resolver_match.url_name == 'editor-court-lingo' %} aria-current="page"{% endif %}>Court Lingo</a>
+      {% endif %}
     </nav>
   </header>
-  <main class="container editor">
+  <main class="container editor" id="main">
     {% for message in messages %}
       <p class="editor-notice" role="status">{{ message }}</p>
     {% endfor %}

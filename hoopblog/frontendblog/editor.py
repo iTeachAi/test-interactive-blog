@@ -1,28 +1,31 @@
 from django.contrib import messages
 from django.contrib.auth.mixins import UserPassesTestMixin
 from django.contrib.messages.views import SuccessMessageMixin
+from django.db import transaction
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DeleteView, ListView, UpdateView, View
 
-from backend.forms import BlogPostForm, NewBlogPostForm
-from backend.models import BlogPost
+from backend.forms import BlogPostForm, CourtTermEditorForm, NewBlogPostForm
+from backend.models import BlogPost, CourtTerm
 from backend.webhook import BlogWebhookError, generate_blog_image, process_blog_post
 
 
 class BlogEditorAccessMixin(UserPassesTestMixin):
     login_url = reverse_lazy('admin:login')
+    editor_permissions = ()
 
     def test_func(self):
         user = self.request.user
-        return user.is_active and user.is_staff and any(
-            user.has_perm(permission) for permission in self.editor_permissions
+        return user.is_active and user.is_staff and (
+            not self.editor_permissions or any(user.has_perm(permission) for permission in self.editor_permissions)
         )
 
 
 class BlogEditorView(BlogEditorAccessMixin, ListView):
     editor_permissions = ('backend.add_blogpost', 'backend.change_blogpost', 'backend.delete_blogpost')
     model = BlogPost
+    queryset = BlogPost.objects.prefetch_related('audiences')
     context_object_name = 'posts'
     template_name = 'frontendblog/editor/index.html'
 
@@ -43,15 +46,19 @@ class BlogCreateView(BlogEditorAccessMixin, SuccessMessageMixin, CreateView):
             form.add_error(None, str(error))
             return self.form_invalid(form)
 
+        audiences = post_data.pop('audiences', [])
         for field, value in post_data.items():
             setattr(form.instance, field, value)
-        return super().form_valid(form)
+        with transaction.atomic():
+            response = super().form_valid(form)
+            self.object.audiences.set(audiences)
+        return response
 
 
 class BlogUpdateView(BlogEditorAccessMixin, SuccessMessageMixin, UpdateView):
     editor_permissions = ('backend.change_blogpost',)
     model = BlogPost
-    fields = (*BlogPostForm.Meta.fields, 'status')
+    fields = (*BlogPostForm.Meta.fields, 'status', 'date', 'audiences', 'topics')
     template_name = 'frontendblog/editor/form.html'
     success_url = reverse_lazy('blog-editor')
     success_message = 'Post updated.'
@@ -86,3 +93,26 @@ class BlogDeleteView(BlogEditorAccessMixin, SuccessMessageMixin, DeleteView):
     template_name = 'frontendblog/editor/confirm_delete.html'
     success_url = reverse_lazy('blog-editor')
     success_message = 'Post deleted.'
+
+class CourtTermEditorView(BlogEditorAccessMixin, ListView):
+    editor_permissions = ('backend.add_courtterm', 'backend.change_courtterm', 'backend.view_courtterm')
+    model = CourtTerm
+    context_object_name = 'terms'
+    template_name = 'frontendblog/editor/terms.html'
+
+
+class CourtTermFormMixin(BlogEditorAccessMixin, SuccessMessageMixin):
+    model = CourtTerm
+    form_class = CourtTermEditorForm
+    template_name = 'frontendblog/editor/term_form.html'
+    success_url = reverse_lazy('editor-court-lingo')
+
+
+class CourtTermCreateView(CourtTermFormMixin, CreateView):
+    editor_permissions = ('backend.add_courtterm',)
+    success_message = 'Court Lingo entry added.'
+
+
+class CourtTermUpdateView(CourtTermFormMixin, UpdateView):
+    editor_permissions = ('backend.change_courtterm',)
+    success_message = 'Court Lingo entry updated.'

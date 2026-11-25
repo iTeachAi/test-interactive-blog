@@ -2,8 +2,9 @@ import codecs
 import re
 
 from django import forms
+from django.utils.text import slugify
 
-from .models import BlogPost
+from .models import BlogPost, ConsultationRequest, CourtTerm
 
 
 class BlogPostForm(forms.ModelForm):
@@ -66,3 +67,48 @@ class BlogPostImportForm(BlogPostForm):
 class NewBlogPostForm(BlogPostImportForm):
     class Meta(BlogPostImportForm.Meta):
         fields = ('body',)
+
+
+class ConsultationRequestForm(forms.ModelForm):
+    class Meta:
+        model = ConsultationRequest
+        fields = ('name', 'email', 'role', 'question')
+        labels = {'question': 'What basketball question would you like to work through?'}
+        widgets = {
+            'name': forms.TextInput(attrs={'autocomplete': 'name'}),
+            'email': forms.EmailInput(attrs={'autocomplete': 'email'}),
+            'question': forms.Textarea(attrs={'rows': 5}),
+        }
+
+class CourtTermPDFInput(forms.ClearableFileInput):
+    template_name = 'frontendblog/editor/pdf_input.html'
+
+    def __init__(self, attrs=None):
+        super().__init__({'accept': '.pdf,application/pdf', **(attrs or {})})
+
+
+class CourtTermEditorForm(forms.ModelForm):
+    class Meta:
+        model = CourtTerm
+        fields = ('name', 'pdf', 'meaning', 'aliases', 'when_to_use', 'on_court', 'articles')
+        labels = {'name': 'Word or phrase', 'meaning': 'Definition or concept', 'articles': 'Related articles'}
+        widgets = {
+            'pdf': CourtTermPDFInput,
+            'meaning': forms.Textarea(attrs={'rows': 5}),
+            'when_to_use': forms.Textarea(attrs={'rows': 3}),
+            'on_court': forms.Textarea(attrs={'rows': 3}),
+        }
+
+    def clean_name(self):
+        name = self.cleaned_data['name']
+        slug = slugify(name)[:50].rstrip('-')
+        if not slug:
+            raise forms.ValidationError('Enter a term with at least one letter or number.')
+        terms = CourtTerm.objects.exclude(pk=self.instance.pk)
+        if terms.filter(name__iexact=name).exists() or (
+            not self.instance.pk and terms.filter(slug=slug).exists()
+        ):
+            raise forms.ValidationError('An entry for this term already exists.')
+        if not self.instance.pk:
+            self.instance.slug = slug
+        return name

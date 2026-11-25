@@ -125,8 +125,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_ROOT = Path(os.getenv('DJANGO_MEDIA_ROOT') or BASE_DIR / 'uploads')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STAT_SHEET_IMAGE_WEBHOOK_URL = os.getenv('STAT_SHEET_IMAGE_WEBHOOK_URL', '').strip()
+STAT_SHEET_ANALYZER_URL = os.getenv('STAT_SHEET_ANALYZER_URL', '').strip()
+CONSULTATION_BOOKING_URL = os.getenv('CONSULTATION_BOOKING_URL', '').strip()

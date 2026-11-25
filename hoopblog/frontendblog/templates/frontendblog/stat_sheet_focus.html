@@ -1,0 +1,15 @@
+<script>
+  (() => {
+    const type = document.getElementById('id_statsheet_type');
+    const focus = document.getElementById('id_focus_team');
+    const field = focus.closest('p, div');
+    const updateFocus = () => {
+      const isGame = type.value === 'game';
+      field.hidden = !isGame;
+      focus.disabled = !isGame;
+      focus.required = isGame;
+    };
+    type.addEventListener('change', updateFocus);
+    updateFocus();
+  })();
+</script>

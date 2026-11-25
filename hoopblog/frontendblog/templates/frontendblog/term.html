@@ -1,0 +1,66 @@
+{% extends 'frontendblog/base.html' %}
+{% block title %}{{ term.name }} | Court Lingo{% endblock %}
+{% block head %}
+<style>
+  .pdf-viewer { margin-block: 1.5rem; }
+  .pdf-viewer:fullscreen { display: flex; flex-direction: column; background: var(--background); }
+  .pdf-viewer button[hidden] { display: none; }
+  .pdf-viewer .actions { margin: 0 0 .75rem; }
+  .pdf-viewer:fullscreen .actions { padding: .75rem; margin: 0; }
+  .pdf-viewer iframe { display: block; width: 100%; height: clamp(22rem, 70vh, 52rem); border: 1px solid var(--border); background: var(--surface); }
+  .pdf-viewer:fullscreen iframe { flex: 1; min-height: 0; }
+</style>
+{% endblock %}
+{% block content %}
+<main class="container post" id="main">
+  <a href="{% url 'court-lingo' %}">Court Lingo</a>
+  <h1>{{ term.name }}</h1>
+  {% if term.aliases %}<p class="meta">Also called {{ term.aliases }}</p>{% endif %}
+  {% if term.pdf %}
+    {% url 'court-term-pdf' term.slug as pdf_url %}
+    <section class="pdf-viewer" id="term-pdf" aria-label="PDF viewer">
+      <div class="actions">
+        <button type="button" class="button" id="pdf-fullscreen" hidden>Full screen</button>
+        <a href="{{ pdf_url }}" target="_blank" rel="noopener">Open PDF in new tab</a>
+      </div>
+      <iframe src="{{ pdf_url }}" title="{{ term.name }} PDF"></iframe>
+    </section>
+    <script>
+      (() => {
+        const viewer = document.querySelector('#term-pdf');
+        const button = document.querySelector('#pdf-fullscreen');
+        if (!document.fullscreenEnabled || !viewer.requestFullscreen) return;
+        button.hidden = false;
+        button.addEventListener('click', async () => {
+          try {
+            if (document.fullscreenElement === viewer) {
+              await document.exitFullscreen();
+            } else {
+              await viewer.requestFullscreen();
+            }
+          } catch {
+            viewer.querySelector('a').focus();
+          }
+        });
+        document.addEventListener('fullscreenchange', () => {
+          button.textContent = document.fullscreenElement === viewer ? 'Exit full screen' : 'Full screen';
+        });
+      })();
+    </script>
+  {% endif %}
+  {% if term.meaning or term.when_to_use or term.on_court %}
+  <dl class="definitions">
+    {% if term.meaning %}<dt>What it means</dt><dd>{{ term.meaning }}</dd>{% endif %}
+    {% if term.when_to_use %}<dt>When you’ll hear it</dt><dd>{{ term.when_to_use }}</dd>{% endif %}
+    {% if term.on_court %}<dt>What it looks like on the court</dt><dd>{{ term.on_court }}</dd>{% endif %}
+  </dl>
+  {% endif %}
+  {% if articles or videos %}
+    <h2>Related lessons</h2>
+    <ul>
+      {% for post in articles %}<li><a href="{{ post.get_absolute_url }}">{{ post.title }}</a></li>{% endfor %}
+      {% for video in videos %}<li><a href="{{ video.source_url }}">{{ video.title }} (video)</a></li>{% endfor %}
+    </ul>
+  {% endif %}
+</main>
+{% endblock %}

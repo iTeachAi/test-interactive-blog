@@ -1,0 +1,19 @@
+{% extends 'frontendblog/base.html' %}
+{% block title %}Free First Consultation | Basketball Explained{% endblock %}
+{% block content %}
+<main class="container post" id="main">
+  {% if received %}
+    <h1>We received your request.</h1>
+    <p>We’ll email you to arrange a time for your free first consultation.</p>
+    <p><a href="{% url 'home' %}">Back to Basketball Explained</a></p>
+  {% else %}
+    <h1>Free first consultation</h1>
+    <p>Tell us what you’re working on. We’ll email you to arrange a time to talk.</p>
+    <form class="request-form" method="post">
+      {% csrf_token %}
+      {{ form.as_p }}
+      <button class="button">Request My Free First Consultation</button>
+    </form>
+  {% endif %}
+</main>
+{% endblock %}

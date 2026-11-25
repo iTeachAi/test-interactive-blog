@@ -43,7 +43,8 @@ def normalize_lesson(data):
         **data,
         'schema_version': '1.0',
         'status': data.get('status', 'draft'),
-        'classification': {'primary_topic_key': topics.get('primary_id')},
+        'classification': {**(data.get('classification') or {}), 'primary_topic_key': topics.get('primary_id')}
+        if isinstance(data.get('classification'), dict) else {'primary_topic_key': topics.get('primary_id')},
         'topic_mentions': [
             {**topic, 'key': topic.get('id')} for topic in new_topics if isinstance(topic, dict)
         ],

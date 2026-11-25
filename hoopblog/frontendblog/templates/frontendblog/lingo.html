@@ -1,0 +1,23 @@
+{% extends 'frontendblog/base.html' %}
+{% block title %}Court Lingo | Basketball Explained{% endblock %}
+{% block content %}
+<main class="container" id="main">
+  <h1 class="page-title">Court Lingo</h1>
+  <p>Basketball phrases explained.</p>
+  <form method="get" class="filters" role="search">
+    <div><label for="phrase">Search for a phrase</label><input type="search" id="phrase" name="q" value="{{ query }}" maxlength="150" placeholder="Try “ice” or “closeout”"></div>
+    <button class="button">Search</button>
+    {% if query %}<a href="{% url 'court-lingo' %}">Clear search</a>{% endif %}
+  </form>
+  <div class="cards">
+    {% for term in terms %}
+      <article class="card-body">
+        <h2><a href="{% url 'court-term' term.slug %}">{{ term.name }}</a></h2>
+        {% if term.meaning %}<p>{{ term.meaning }}</p>{% elif term.pdf %}<p>PDF lesson</p>{% endif %}
+      </article>
+    {% empty %}
+      <p class="empty">No phrases match “{{ query }}”. Try a shorter phrase or a different spelling.</p>
+    {% endfor %}
+  </div>
+</main>
+{% endblock %}

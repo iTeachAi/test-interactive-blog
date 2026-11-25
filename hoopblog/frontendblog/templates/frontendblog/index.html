@@ -1,71 +1,41 @@
-{% extends "frontendblog/base.html" %}
+{% extends 'frontendblog/base.html' %}
 
 {% block content %}
-  <header class="masthead">
-    <div class="container hero">
-      {% if user.is_active and user.is_staff %}
-        {% if perms.backend.add_blogpost or perms.backend.change_blogpost or perms.backend.delete_blogpost %}
-          <nav aria-label="Administration"><a href="{% url 'blog-editor' %}">Manage posts</a></nav>
-        {% endif %}
-      {% endif %}
-      <h1>Hoop City Lessons</h1>
-      <p>Explore basketball lessons and articles by topic.</p>
+<main id="main">
+  <section class="home-hero container" aria-labelledby="headline">
+    <div class="hero-copy">
+      <h1 id="headline">Understand the game. <em>Know what to do next.</em></h1>
+      <p>Break down a stat sheet, learn what your coach means, and find basketball lessons written for players, coaches, and parents.</p>
+      <div class="actions">
+        <a class="button" href="{% url 'stat-analyzer' %}">Analyze a Stat Sheet</a>
+        <a class="button secondary" href="{% url 'consultation' %}">Book a Free First Consultation</a>
+      </div>
     </div>
-  </header>
-
-  {% if sections %}
-    <nav class="container section-nav" aria-label="Content sections">
-      {% for section in sections %}
-        <a href="#section-{{ forloop.counter }}">{{ section.title }}</a>
-      {% endfor %}
-    </nav>
-  {% endif %}
-
-  <main class="container">
-    {% comment %}
-      The view can pass sections with title and entries. Each entry has a
-      title and optional summary, url, image_url, image_alt, date, and author.
-      Supply date as a date or datetime.
-    {% endcomment %}
-    {% for section in sections %}
-      <section id="section-{{ forloop.counter }}" aria-labelledby="heading-{{ forloop.counter }}">
-        <h2 id="heading-{{ forloop.counter }}">{{ section.title }}</h2>
-        {% if section.entries %}
-          <div class="cards">
-            {% for entry in section.entries %}
-              <article>
-                {% if entry.image_url %}
-                  <img src="{{ entry.image_url }}" alt="{{ entry.image_alt|default:'' }}" loading="lazy">
-                {% endif %}
-                <div class="card-body">
-                  <h3>
-                    {% if entry.url %}
-                      <a href="{{ entry.url }}">{{ entry.title }}</a>
-                    {% else %}
-                      {{ entry.title }}
-                    {% endif %}
-                  </h3>
-                  {% if entry.date or entry.author %}
-                    <p class="meta">
-                      {% if entry.date %}<time datetime="{{ entry.date|date:'Y-m-d' }}">{{ entry.date|date:'M j, Y' }}</time>{% endif %}
-                      {% if entry.date and entry.author %} · {% endif %}
-                      {% if entry.author %}{{ entry.author }}{% endif %}
-                    </p>
-                  {% endif %}
-                  {% if entry.summary %}<p>{{ entry.summary }}</p>{% endif %}
-                </div>
-              </article>
-            {% endfor %}
-          </div>
-        {% else %}
-          <p class="empty">There are no entries in this section yet.</p>
-        {% endif %}
+    <div class="court" aria-hidden="true">
+      <div class="court-line top"></div><div class="court-line center"></div><div class="court-line bottom"></div>
+      <div class="key top"></div><div class="key bottom"></div>
+      <div class="marker ball"></div><div class="marker offense"></div><div class="marker defense"></div>
+    </div>
+  </section>
+  <div class="resource-band">
+    <div class="container">
+      <section aria-labelledby="resources-heading">
+        <h2 id="resources-heading">Free basketball resources</h2>
+        <div class="cards">
+          <article class="card-body"><h3><a href="{% url 'stat-analyzer' %}">Stat Sheet Analyzer</a></h3><p>See what a box score tells you and what to look for next.</p></article>
+          <article class="card-body"><h3><a href="{% url 'court-lingo' %}">Court Lingo</a></h3><p>Basketball phrases explained.</p></article>
+          <article class="card-body"><h3><a href="{% url 'video-lessons' %}">Video Lessons</a></h3><p>Find lessons by topic and audience.</p></article>
+        </div>
       </section>
-    {% empty %}
-      <section aria-labelledby="latest-heading">
-        <h2 id="latest-heading">Latest posts</h2>
-        <p class="empty">There are no posts to display yet.</p>
+      <section aria-labelledby="blog-heading">
+        <h2 id="blog-heading">Find your basketball blog</h2>
+        <div class="cards">
+          <article class="card-body"><h3><a href="{% url 'audience-blog' 'player' %}">I’m a Player</a></h3><p>Build skills, make reads, and practice for your role.</p></article>
+          <article class="card-body"><h3><a href="{% url 'audience-blog' 'coach' %}">I’m a Coach</a></h3><p>Teach concepts, design practices, and evaluate performance.</p></article>
+          <article class="card-body"><h3><a href="{% url 'audience-blog' 'parent' %}">I’m a Parent</a></h3><p>Follow your player’s development and ask informed questions.</p></article>
+        </div>
       </section>
-    {% endfor %}
-  </main>
+    </div>
+  </div>
+</main>
 {% endblock %}

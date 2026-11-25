@@ -1,0 +1,18 @@
+{% extends "frontendblog/editor/base.html" %}
+
+{% block title %}{% if object %}Edit term{% else %}Add a term{% endif %} | Editor{% endblock %}
+
+{% block editor_content %}
+  <div class="editor-heading"><h1>{% if object %}Edit term{% else %}Add a term{% endif %}</h1></div>
+  {% if object.pdf %}
+    <p><a href="{% url 'court-term-pdf' object.slug %}" target="_blank" rel="noopener">View current PDF</a></p>
+  {% endif %}
+  <form class="editor-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_div }}
+    <div class="editor-actions">
+      <button class="button" type="submit">{% if object %}Save changes{% else %}Publish term{% endif %}</button>
+      <a href="{% url 'editor-court-lingo' %}">Cancel</a>
+    </div>
+  </form>
+{% endblock %}

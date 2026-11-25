@@ -1,0 +1,37 @@
+{% if form.webhook_error %}<p class="callout" role="status">{{ form.webhook_error }}</p>{% endif %}
+{% if form.webhook_analysis %}
+  <section class="callout">
+    <h2>Stat sheet analysis</h2>
+    {{ form.webhook_analysis|linebreaks }}
+  </section>
+{% endif %}
+    <section class="callout" aria-labelledby="stat-results">
+      <h2 id="stat-results">What the numbers show</h2>
+      <div class="table-scroll" tabindex="0" role="region" aria-labelledby="stat-results">
+        <table>
+          <thead><tr><th scope="col">{% if form.cleaned_data.statsheet_type == 'team' %}Player or team{% else %}Player{% endif %}</th><th scope="col">Points</th><th scope="col">Assists</th><th scope="col">Turnovers</th><th scope="col">Effective FG%</th></tr></thead>
+          <tbody>
+          {% for line in players %}
+            <tr>
+              <th scope="row">{{ line.player }}{% if line.team %}<br><span class="meta">{{ line.team }}</span>{% endif %}</th>
+              <td>{{ line.points|default_if_none:'—' }}</td><td>{{ line.assists|default_if_none:'—' }}</td><td>{{ line.turnovers|default_if_none:'—' }}</td>
+              <td>{% if line.effective_fg is not None %}{{ line.effective_fg|floatformat:1 }}%{% else %}—{% endif %}</td>
+            </tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      <p class="meta">A dash means the value was unavailable. Effective field goal percentage counts a made three as 1.5 made twos and excludes free throws.</p>
+      {% if highlights %}
+        <h3>Highest recorded totals</h3>
+        <dl class="definitions">
+          {% for highlight in highlights %}
+            <dt>{{ highlight.label }}</dt><dd>{{ highlight.value }} · {{ highlight.leaders|join:", " }}</dd>
+          {% endfor %}
+        </dl>
+      {% endif %}
+      <h3>What needs more context</h3>
+      <p>Compare players in light of their minutes, responsibilities, and shot volume. A high percentage on a few attempts can change quickly, and an assist total misses passes that created good shots teammates missed.</p>
+      <h3>What to look for next</h3>
+      <p>Review a few possessions behind the numbers. Check whether shots came from the spots the offense wanted, and look for patterns in where turnovers happened and what pressure caused them.</p>
+    </section>

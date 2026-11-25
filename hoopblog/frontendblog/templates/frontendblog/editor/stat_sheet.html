@@ -1,0 +1,23 @@
+{% extends "frontendblog/editor/base.html" %}
+
+{% block title %}Stat Sheet Analyzer | Editor{% endblock %}
+
+{% block editor_content %}
+  <div class="editor-heading"><h1>Stat Sheet Analyzer</h1></div>
+  <form class="editor-form" method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <p>Upload a game or team CSV with stats such as points, assists, or turnovers.</p>
+    {% if image_enabled %}
+      <p class="meta">You can also upload a PNG or JPEG up to 5 MiB. Images are sent to the configured extraction service.</p>
+    {% else %}
+      <p class="meta">Image extraction is unavailable. Upload a CSV up to 256 KiB.</p>
+    {% endif %}
+    {{ form.as_div }}
+    {% if form.sends_csv %}<p class="meta">Your CSV is sent to the analysis service.</p>{% endif %}
+    <div><button class="button" type="submit">Analyze Stat Sheet</button></div>
+  </form>
+    {% include 'frontendblog/stat_sheet_focus.html' %}
+  {% if players %}
+    {% include "frontendblog/stat_results.html" %}
+  {% endif %}
+{% endblock %}

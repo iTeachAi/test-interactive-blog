@@ -1,6 +1,6 @@
 {% extends "frontendblog/base.html" %}
 
-{% block title %}{{ post.title }} | Hoop City Lessons{% endblock %}
+{% block title %}{{ post.title }} | Basketball Explained{% endblock %}
 
 {% block head %}
   <style>
@@ -20,8 +20,8 @@
 {% endblock %}
 
 {% block content %}
-  <main class="container post">
-    <a href="{% url 'home' %}">All posts</a>
+  <main id="main" class="container post">
+    <a href="{% url 'blog-archive' %}">All posts</a>
     <h1>{{ post.title }}</h1>
     <p class="meta">
       {{ post.category }} · <time datetime="{{ post.date|date:'Y-m-d' }}">{{ post.date|date:'M j, Y' }}</time>
@@ -68,5 +68,9 @@
     {% else %}
       <div class="post-body">{{ post.body }}</div>
     {% endif %}
+    <aside class="callout">
+      <h2>{% if is_coach_article %}Want help teaching this concept to your team?{% else %}Want help applying this lesson to your game?{% endif %}</h2>
+      <a class="button" href="{% url 'consultation' %}">Book a Free First Consultation</a>
+    </aside>
   </main>
 {% endblock %}
